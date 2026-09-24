@@ -116,6 +116,8 @@
   </main>
 
   <footer id="support" class="support">
+    <!-- Hidden until sponsors.json has "visible": true, so it never flashes on screen. -->
+    <div id="supportArea" hidden>
     <p id="supportTitle" class="support-title" hidden>{{t.support_title}}</p>
     <div id="supportTiles" class="support-tiles" hidden>
       <a id="coffeeTile" class="support-tile coffee" target="_blank" rel="noopener" hidden>
@@ -138,6 +140,7 @@
 
     <p class="support-title sponsors-title">{{t.sponsors}}</p>
     <div id="sponsorSlots" class="sponsor-slots"></div>
+    </div>
 
     <div class="privacy">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
@@ -151,6 +154,7 @@
       thanks to <a class="opus" href="https://claude.ai" target="_blank" rel="noopener"><span class="claude-icon" aria-hidden="true"></span>Opus</a>
       <a class="gh" href="https://github.com/barisekara/reviewboxd" target="_blank" rel="noopener" title="GitHub" aria-label="GitHub"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/github.svg" alt="" /></a>
     </p>
+    <p class="legal">{{t.legal}}</p>
   </footer>
 </body>
 </html>

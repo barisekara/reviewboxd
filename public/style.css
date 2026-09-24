@@ -146,7 +146,7 @@ textarea:focus { border-color: var(--accent); }
 /* ---------- support tiles ---------- */
 
 .support { max-width: 680px; margin: 56px auto 0; text-align: center; }
-.support-tiles[hidden], .support-title[hidden], .support-tile[hidden] { display: none; }
+#supportArea[hidden], .support-tiles[hidden], .support-title[hidden], .support-tile[hidden] { display: none; }
 .support-title { color: var(--muted); margin: 0 0 14px; font-size: 14px; }
 .support-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 .support-tile {
@@ -216,6 +216,8 @@ a.sponsor-slot.empty:hover strong { opacity: 1; }
 .made-by .gh { display: inline-flex; margin-left: 8px; opacity: .7; transition: opacity .15s; }
 .made-by .gh:hover { opacity: 1; }
 .made-by .gh img { width: 16px; height: 16px; filter: invert(1); }
+
+.legal { max-width: 560px; margin: 18px auto 0; font-size: 11.5px; line-height: 1.5; color: var(--muted); opacity: .75; text-wrap: pretty; }
 
 /* shared card page (/c/:id) */
 .card-page { display: grid; place-items: center; align-content: center; gap: 16px; }

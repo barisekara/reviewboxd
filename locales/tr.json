@@ -53,5 +53,6 @@
   "make_own": "Kendi kartını oluştur",
   "privacy_title": "Analitik yok, takip yok, reklam yok. Tamamen eğlence için.",
   "privacy_body": "Kullandığım tek çerez dil tercihini hatırlar. Paylaşım bağlantıları, çalışabilmeleri için kartın bir kopyasını saklar.",
-  "err_not_found": "Bu incelemeyi bulamadık. Bağlantıyı kontrol et; belki silinmiştir."
+  "err_not_found": "Bu incelemeyi bulamadık. Bağlantıyı kontrol et; belki silinmiştir.",
+  "legal": "reviewboxd bağımsız bir hayran projesidir; Letterboxd ile bağlantılı değildir ve Letterboxd tarafından onaylanmamıştır. Letterboxd adı, film afişleri ve görselleri ilgili sahiplerine aittir."
 }

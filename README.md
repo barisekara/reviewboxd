@@ -85,12 +85,15 @@ under ~80. No restart needed.
 
 ## Sponsor slots
 
-The footer has three company sponsor slots, configured in `sponsors.json`. The file is re-read
+The footer has donation tiles (see `BMC_USERNAME` / `GITHUB_SPONSORS_USERNAME`) and three
+company sponsor slots, configured in `sponsors.json`. The whole area is hidden until you set
+`"visible": true`. The file is re-read
 on every request, so there's no restart needed. Empty slots (`null`) show a "Your logo here"
 placeholder. If `contact` is set (`mailto:` or `https://`), empty slots link to it.
 
 ```json
 {
+  "visible": true,
   "contact": "mailto:you@example.com",
   "slots": [
     { "name": "Acme", "url": "https://acme.com", "logo": "acme.svg" },
@@ -147,8 +150,9 @@ It helps keep the site online. More of my work is at [baris.wtf](https://baris.w
 
 ## Disclaimer
 
-reviewboxd is an independent fan project. It is not affiliated with or endorsed by Letterboxd.
-Film posters and backdrops belong to their respective rights holders.
+reviewboxd is an independent fan project and is not affiliated with, endorsed by or connected
+to Letterboxd. The Letterboxd name, film posters and images belong to their respective owners.
+The same notice appears at the bottom of every page of the site.
 
 ## License
 

@@ -43,7 +43,8 @@ async function loadSponsors() {
   const contact = typeof config.contact === "string" && /^(mailto:|https?:\/\/)\S+$/i.test(config.contact)
     ? config.contact
     : null;
-  return { contact, slots };
+  // The whole support area (donation tiles + sponsor slots) stays hidden unless "visible": true.
+  return { visible: config.visible === true, contact, slots };
 }
 
 // ---------- i18n ----------
@@ -469,6 +470,7 @@ async function handleCard(req, res, id, isImage) {
 </head><body class="card-page">
 <img class="shared-card" src="${escapeHtml(img)}" alt="${escapeHtml(meta.title)}" />
 <p class="card-links"><a href="${escapeHtml(meta.reviewUrl)}" rel="noopener">${escapeHtml(dict.read_full)}</a> · <a href="${escapeHtml(app)}">${escapeHtml(dict.make_own)}</a></p>
+<p class="legal">${escapeHtml(dict.legal)}</p>
 </body></html>`);
   } catch {
     res.writeHead(404).end("Not found");

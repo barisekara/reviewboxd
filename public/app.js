@@ -402,6 +402,7 @@ fetch("/api/config")
     $("supportTitle").hidden = !anyTile;
     $("supportTiles").hidden = !anyTile;
     renderSponsorSlots(sponsors);
+    $("supportArea").hidden = !sponsors.visible;
   })
   .catch(() => {});
 
