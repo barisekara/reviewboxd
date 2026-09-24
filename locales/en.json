@@ -55,5 +55,6 @@
   "privacy_body": "The only cookie I set remembers your language. Share links keep a copy of the card so the link works.",
   "err_not_found": "We couldn't find that review. Double-check the link; maybe it was deleted.",
   "legal": "Independent fan project, not affiliated with Letterboxd.",
-  "err_rate_limited": "We don't want to get on Letterboxd's bad side. Try again in a minute for a new poster."
+  "err_rate_limited": "We don't want to get on Letterboxd's bad side. Try again in a minute for a new poster.",
+  "err_too_old": "This is a repeat review of the film, and for those Letterboxd only lets us read a reviewer's 50 most recent diary entries. This one is older, sorry! Their first review of the film works any time."
 }

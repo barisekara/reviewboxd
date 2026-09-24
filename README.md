@@ -47,6 +47,9 @@ required attribution when TMDB images are used.
   directly (CORS). It reads the page's JSON-LD and meta tags (text, rating, film, poster,
   director, reviewer, avatar). It also proxies images through `/img` so the card can be
   exported as a PNG.
+- Repeat reviews of the same film (`/<user>/film/<slug>/1/`) sit behind a Letterboxd bot
+  challenge, which reviewboxd doesn't try to bypass. It reads those from the reviewer's public
+  RSS feed instead, which only covers their 50 most recent diary entries.
 - `public/` is a vanilla HTML/CSS/JS front end. The card is laid out at its real export
   size (1080×1350, 1080×1920 or 1600×900) and scaled down for the preview. Download PNG
   uses [html-to-image](https://github.com/bubkoo/html-to-image).

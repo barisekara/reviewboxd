@@ -239,6 +239,11 @@ async function scrapeReview(inputUrl) {
     throw fail("fetch", `Letterboxd is unreachable: ${err.cause?.code || err.message}`);
   }
   if (res.status === 404) throw fail("not_found", "Review not found.");
+  // Letterboxd puts repeat-review pages (/film/<slug>/1/) behind a bot challenge. We don't try to
+  // get past it; the same review is in the reviewer's public RSS feed.
+  if (res.status === 403 && res.headers.get("cf-mitigated") === "challenge" && isRepeatReview(res.url)) {
+    return scrapeRepeatReview(res.url);
+  }
   if (!res.ok) throw fail("fetch", `Letterboxd responded with ${res.status}`);
   // boxd.it short links are only checked once we know where they lead
   if (!isReviewPath(res.url)) throw fail("not_review", "That link doesn't look like a review.");
@@ -268,34 +273,12 @@ async function scrapeReview(inputUrl) {
     /\((\d{4})\)/
   );
 
-  let poster = film.image ? film.image.replace(/-0-\d+-0-\d+-crop/, "-0-1000-0-1500-crop") : null;
-
-  // og:image is the film backdrop when there is one (wide crop from the "sm/upload" bucket).
-  const ogImage = meta(html, "og:image");
-  // Ask for the 1920×1080 size: it gets stretched across the whole card.
-  let backdrop =
-    ogImage && ogImage.includes("/sm/upload/")
-      ? ogImage.replace(/-\d+-\d+-\d+-\d+-crop/, "-1920-1920-1080-1080-crop")
-      : null;
-
-  let imageSource = "letterboxd";
-  if (POSTER_SOURCE === "tmdb" && TMDB_API_KEY && film.sameAs) {
-    try {
-      const tmdb = await tmdbImages(film.sameAs);
-      if (tmdb.poster) {
-        poster = tmdb.poster;
-        backdrop = tmdb.backdrop || backdrop;
-        imageSource = "tmdb";
-      }
-    } catch (err) {
-      console.warn(`TMDB lookup failed for ${film.sameAs}, using Letterboxd images: ${err.message}`);
-    }
-  }
+  const images = await filmImages(largePoster(film.image), backdropFrom(html), film.sameAs);
 
   const author = (ld.author && ld.author[0]) || {};
-  const username = decodeEntities(author.name || meta(html, "twitter:data1") || "");
+  // The JSON-LD "name" is the display name; the username is the first segment of the review URL.
+  const username = new URL(res.url).pathname.split("/")[1] || decodeEntities(author.name || "");
   const displayMatch = html.match(/class="name">\s*<span>([^<]*)<\/span>/);
-  const avatarMatch = html.match(/<a class="avatar[^"]*"[^>]*>\s*<img src="([^"]+)"/);
 
   return {
     url: ld.url || reviewUrl,
@@ -306,16 +289,119 @@ async function scrapeReview(inputUrl) {
       title,
       year: yearMatch ? yearMatch[1] : null,
       directors: (film.director || []).map((d) => decodeEntities(d.name)),
-      poster,
-      backdrop,
-      imageSource,
+      ...images,
     },
     author: {
       username,
       displayName: displayMatch ? decodeEntities(displayMatch[1].trim()) : username,
-      avatar: avatarMatch
-        ? avatarMatch[1].replace(/-0-\d+-0-\d+-crop/, "-0-220-0-220-crop")
-        : null,
+      avatar: avatarFrom(html),
+    },
+  };
+}
+
+// ---------- shared page helpers ----------
+
+// Letterboxd image URLs carry their crop size; ask for bigger versions than the page shows.
+const largePoster = (url) => (url ? url.replace(/-0-\d+-0-\d+-crop/, "-0-1000-0-1500-crop") : null);
+
+// og:image is the film backdrop when it's a wide image (films without one fall back to the poster).
+// Letterboxd serves backdrops from more than one path, so judge by shape, not by URL.
+function backdropFrom(html) {
+  const image = meta(html, "og:image");
+  const width = Number(meta(html, "og:image:width"));
+  const height = Number(meta(html, "og:image:height"));
+  if (!image || !(width > height)) return null;
+  // Ask for the 1920×1080 size: it gets stretched across the whole card.
+  return image.replace(/-\d+-\d+-\d+-\d+-crop/, "-1920-1920-1080-1080-crop");
+}
+
+function avatarFrom(html) {
+  const m = html.match(/<a class="avatar[^"]*"[^>]*>\s*<img src="([^"]+)"/);
+  return m ? m[1].replace(/-0-\d+-0-\d+-crop/, "-0-220-0-220-crop") : null;
+}
+
+// Letterboxd images by default; TMDB when POSTER_SOURCE=tmdb (falls back to Letterboxd on failure).
+async function filmImages(poster, backdrop, filmUrl) {
+  if (POSTER_SOURCE === "tmdb" && TMDB_API_KEY && filmUrl) {
+    try {
+      const tmdb = await tmdbImages(filmUrl);
+      if (tmdb.poster) return { poster: tmdb.poster, backdrop: tmdb.backdrop || backdrop, imageSource: "tmdb" };
+    } catch (err) {
+      console.warn(`TMDB lookup failed for ${filmUrl}, using Letterboxd images: ${err.message}`);
+    }
+  }
+  return { poster, backdrop, imageSource: "letterboxd" };
+}
+
+async function fetchPage(url) {
+  const res = await fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9" } });
+  if (!res.ok) throw new Error(`${new URL(url).pathname} responded with ${res.status}`);
+  return res.text();
+}
+
+// ---------- repeat reviews (/<user>/film/<slug>/<n>/) via RSS ----------
+
+const isRepeatReview = (url) => /^\/[\w.-]+\/film\/[\w-]+\/\d+\/$/.test(new URL(url).pathname);
+
+const rssTag = (item, tag) => {
+  const m = item.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`));
+  return m ? decodeEntities(m[1].replace(/^<!\[CDATA\[|\]\]>$/g, "").trim()) : null;
+};
+
+async function scrapeRepeatReview(reviewUrl) {
+  const [, user, , slug] = new URL(reviewUrl).pathname.split("/");
+  console.log(`Repeat review is behind a challenge, reading ${user}'s RSS feed instead`);
+
+  let xml;
+  try {
+    xml = await fetchPage(`https://letterboxd.com/${user}/rss/`);
+  } catch (err) {
+    throw fail("fetch", `RSS feed unavailable: ${err.message}`);
+  }
+  const item = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
+    .map((m) => m[1])
+    .find((it) => rssTag(it, "link") === reviewUrl);
+  // The feed only holds the latest 50 diary entries.
+  if (!item) throw fail("too_old", "Repeat review isn't in the reviewer's RSS feed (only the latest 50 entries are).");
+
+  const description = item.match(/<description>([\s\S]*?)<\/description>/)?.[1] || "";
+  const html = description.replace(/^\s*<!\[CDATA\[|\]\]>\s*$/g, "");
+  const posterSrc = html.match(/<img src="([^"]+)"/)?.[1] || null;
+  const body = htmlToText(html.replace(/<p>\s*<img[^>]*>\s*<\/p>/, ""));
+  // Diary entries without a review only say "Watched on …".
+  if (!body || /^Watched on /.test(body)) throw fail("not_review", "That diary entry has no review text.");
+
+  // The feed has no director, backdrop or avatar: get them from the film page and the first review page.
+  const [filmHtml, firstReviewHtml] = await Promise.all([
+    fetchPage(`https://letterboxd.com/film/${slug}/`).catch(() => ""),
+    fetchPage(`https://letterboxd.com/${user}/film/${slug}/`).catch(() => ""),
+  ]);
+  let directors = [];
+  const ldMatch = filmHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  if (ldMatch) {
+    try {
+      const ld = JSON.parse(ldMatch[1].replace(/\/\*\s*<!\[CDATA\[\s*\*\/|\/\*\s*\]\]>\s*\*\//g, ""));
+      directors = (ld.director || []).map((d) => decodeEntities(d.name));
+    } catch {}
+  }
+  const images = await filmImages(largePoster(posterSrc), backdropFrom(filmHtml), `https://letterboxd.com/film/${slug}/`);
+  const rating = rssTag(item, "letterboxd:memberRating");
+
+  return {
+    url: reviewUrl,
+    body,
+    rating: rating ? Number(rating) : null,
+    date: rssTag(item, "letterboxd:watchedDate"),
+    film: {
+      title: rssTag(item, "letterboxd:filmTitle") || "",
+      year: rssTag(item, "letterboxd:filmYear"),
+      directors,
+      ...images,
+    },
+    author: {
+      username: user,
+      displayName: rssTag(item, "dc:creator") || user,
+      avatar: avatarFrom(firstReviewHtml),
     },
   };
 }

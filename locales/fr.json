@@ -55,5 +55,6 @@
   "privacy_body": "Le seul cookie que je dépose retient ta langue. Les liens de partage gardent une copie de la carte pour fonctionner.",
   "err_not_found": "Impossible de trouver cette critique. Vérifie le lien : elle a peut-être été supprimée.",
   "legal": "Projet de fan indépendant, sans lien avec Letterboxd.",
-  "err_rate_limited": "On ne veut pas se fâcher avec Letterboxd. Réessaie dans un instant pour une nouvelle affiche."
+  "err_rate_limited": "On ne veut pas se fâcher avec Letterboxd. Réessaie dans un instant pour une nouvelle affiche.",
+  "err_too_old": "C'est une critique d'un revisionnage, et pour celles-ci Letterboxd ne nous laisse lire que les 50 dernières entrées du journal. Celle-ci est plus ancienne, désolé ! Sa première critique du film fonctionne toujours."
 }

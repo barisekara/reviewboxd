@@ -153,7 +153,7 @@ async function load(url) {
     const data = await res.json();
     if (!res.ok) {
       const err = new Error(I18N[`err_${data.code}`] || data.error || t("generic_error"));
-      err.outage = data.code === "fetch" || data.code === "rate_limited";
+      err.outage = ["fetch", "rate_limited", "too_old"].includes(data.code);
       throw err;
     }
     review = data;
