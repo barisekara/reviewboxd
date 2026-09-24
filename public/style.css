@@ -217,7 +217,7 @@ a.sponsor-slot.empty:hover strong { opacity: 1; }
 .made-by .gh:hover { opacity: 1; }
 .made-by .gh img { width: 16px; height: 16px; filter: invert(1); }
 
-.legal { max-width: 560px; margin: 18px auto 0; font-size: 11.5px; line-height: 1.5; color: var(--muted); opacity: .75; text-wrap: pretty; }
+.legal { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
 
 /* shared card page (/c/:id) */
 .card-page { display: grid; place-items: center; align-content: center; gap: 16px; }
