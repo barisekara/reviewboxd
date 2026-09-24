@@ -6,6 +6,8 @@ the film poster, the star rating, a pull quote from the review, and the reviewer
 No press pass required. Whether your review is a masterpiece or a mess, it's yours: put it on
 a poster and be proud of it.
 
+**No analytics, no tracking, no ads. Just for fun.** See [Privacy](#privacy).
+
 Made by [Barış](https://baris.wtf) · Contributions welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 <a href="https://buymeacoffee.com/barisekara"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="40"></a>
@@ -102,6 +104,26 @@ placeholder. If `contact` is set (`mailto:` or `https://`), empty slots link to 
 Share a preset by link: `/?url=<review link>&format=poster|story|wide`.
 
 This depends on scraping Letterboxd's HTML, so it can break if they change their markup.
+
+## Privacy
+
+reviewboxd is a just-for-fun project and collects nothing about its visitors:
+
+- **No analytics, trackers, ads, accounts or fingerprinting.**
+- **Reviews aren't stored.** The server fetches the Letterboxd page when you ask for it and
+  forgets it after sending you the result.
+- **One cookie:** `lang`, set only when you pick a language in the footer, to remember it.
+- **Share links store a card.** If you use the X / Bluesky / Facebook / … buttons, the card
+  image, quote, film title, review link and creation date are saved on the server so the link can show a
+  preview. Nothing else is attached (no IP address, no identifier).
+- **No request logging.** The server only logs errors.
+
+Third parties: fonts load from Google Fonts, and icons plus the image export library load
+from jsDelivr, so those services see your IP address when the page loads. Images from
+Letterboxd and TMDB go through this server, so those sites don't see you.
+
+If you deploy your own copy behind Cloudflare, note that turning on Cloudflare Web Analytics
+or similar features would make the "no analytics" note untrue for your deployment.
 
 ## Contributing
 

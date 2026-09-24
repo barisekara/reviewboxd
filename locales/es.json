@@ -50,5 +50,7 @@
   "err_not_review": "Ese enlace no parece una reseña.",
   "err_fetch": "No se pudo obtener esa reseña. Revisa el enlace e inténtalo de nuevo.",
   "read_full": "Leer la reseña completa ↗",
-  "make_own": "Crea tu propia tarjeta"
+  "make_own": "Crea tu propia tarjeta",
+  "privacy_title": "Sin analíticas, sin rastreo, sin anuncios. Solo por diversión.",
+  "privacy_body": "La única cookie que uso recuerda tu idioma. Los enlaces para compartir guardan una copia de la tarjeta para funcionar."
 }

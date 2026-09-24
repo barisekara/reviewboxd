@@ -50,5 +50,7 @@
   "err_not_review": "Bu bağlantı bir inceleme gibi görünmüyor.",
   "err_fetch": "İnceleme alınamadı. Bağlantıyı kontrol edip tekrar dene.",
   "read_full": "İncelemenin tamamını oku ↗",
-  "make_own": "Kendi kartını oluştur"
+  "make_own": "Kendi kartını oluştur",
+  "privacy_title": "Analitik yok, takip yok, reklam yok. Tamamen eğlence için.",
+  "privacy_body": "Kullandığım tek çerez dil tercihini hatırlar. Paylaşım bağlantıları, çalışabilmeleri için kartın bir kopyasını saklar."
 }

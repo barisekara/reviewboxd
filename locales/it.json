@@ -50,5 +50,7 @@
   "err_not_review": "Questo link non sembra una recensione.",
   "err_fetch": "Impossibile recuperare la recensione. Controlla il link e riprova.",
   "read_full": "Leggi la recensione completa ↗",
-  "make_own": "Crea la tua card"
+  "make_own": "Crea la tua card",
+  "privacy_title": "Niente analytics, niente tracciamento, niente pubblicità. Solo per divertimento.",
+  "privacy_body": "L'unico cookie che uso ricorda la tua lingua. I link di condivisione conservano una copia della card per funzionare."
 }

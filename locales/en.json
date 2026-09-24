@@ -50,5 +50,7 @@
   "err_not_review": "That link doesn't look like a review.",
   "err_fetch": "Couldn't fetch that review. Check the link and try again.",
   "read_full": "Read the full review ↗",
-  "make_own": "Make your own card"
+  "make_own": "Make your own card",
+  "privacy_title": "No analytics, no tracking, no ads. Just for fun.",
+  "privacy_body": "The only cookie I set remembers your language. Share links keep a copy of the card so the link works."
 }

@@ -50,5 +50,7 @@
   "err_not_review": "Ce lien ne ressemble pas à une critique.",
   "err_fetch": "Impossible de récupérer cette critique. Vérifie le lien et réessaie.",
   "read_full": "Lire la critique complète ↗",
-  "make_own": "Crée ta propre carte"
+  "make_own": "Crée ta propre carte",
+  "privacy_title": "Pas d'analytics, pas de pistage, pas de pub. Juste pour le plaisir.",
+  "privacy_body": "Le seul cookie que je dépose retient ta langue. Les liens de partage gardent une copie de la carte pour fonctionner."
 }
