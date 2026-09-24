@@ -1,32 +1,92 @@
 {
   "en": [
-    "Your review deserves a poster. It doesn’t matter if you write for IndieWire or you just typed “hi barbie” at 2am — if you said it, own it.",
-    "Critics get their words on movie posters. So should you. Every review counts, from the thousand-word essay to the one-liner you’re weirdly proud of.",
-    "No press pass required. Whether your review is a masterpiece or a mess, it’s yours — put it on a poster and be proud of it.",
-    "The critics had their turn. This one’s for the rest of us: the essayists, the shitposters, and everyone in between."
+    {
+      "text": "Your review deserves a poster. It doesn’t matter if you write for IndieWire or you just typed “hi barbie” at 2am — if you said it, own it.",
+      "short": "Your review deserves a poster. IndieWire or “hi barbie” at 2am, own it."
+    },
+    {
+      "text": "Critics get their words on movie posters. So should you. Every review counts, from the thousand-word essay to the one-liner you’re weirdly proud of.",
+      "short": "Critics get their words on posters. So should you. Every review counts."
+    },
+    {
+      "text": "No press pass required. Whether your review is a masterpiece or a mess, it’s yours — put it on a poster and be proud of it.",
+      "short": "No press pass required. Masterpiece or mess, it’s yours. Put it on a poster."
+    },
+    {
+      "text": "The critics had their turn. This one’s for the rest of us: the essayists, the shitposters, and everyone in between.",
+      "short": "The critics had their turn. Now it’s the rest of us, shitposters included."
+    }
   ],
   "fr": [
-    "Ta critique mérite une affiche. Peu importe que tu écrives pour IndieWire ou que tu aies juste tapé « hi barbie » à 2 h du matin — tu l’as dit, assume-le.",
-    "Les critiques voient leurs mots sur les affiches de films. Les tiens aussi devraient y être. Chaque critique compte, de l’essai de mille mots à la petite phrase qui te rend bizarrement fier·e.",
-    "Pas besoin de carte de presse. Chef-d’œuvre ou grand n’importe quoi, ta critique t’appartient — mets-la sur une affiche et assume-la fièrement.",
-    "Les critiques ont eu leur tour. Celui-ci est pour nous autres : les essayistes, les shitposteurs, et tous ceux entre les deux."
+    {
+      "text": "Ta critique mérite une affiche. Peu importe que tu écrives pour IndieWire ou que tu aies juste tapé « hi barbie » à 2 h du matin — tu l’as dit, assume-le.",
+      "short": "Ta critique mérite une affiche. IndieWire ou « hi barbie » à 2 h, assume-la."
+    },
+    {
+      "text": "Les critiques ont leurs mots sur les affiches. Pourquoi pas toi ? Chaque critique compte, de l’essai de mille mots à la petite phrase dont tu es bizarrement fier·e.",
+      "short": "Les critiques ont leurs mots sur les affiches. Toi aussi. Chaque critique compte."
+    },
+    {
+      "text": "Pas besoin de carte de presse. Chef-d’œuvre ou grand n’importe quoi, ta critique t’appartient — mets-la sur une affiche et assume-la fièrement.",
+      "short": "Pas besoin de carte de presse. Chef-d’œuvre ou n’importe quoi, affiche-la."
+    },
+    {
+      "text": "Les critiques ont eu leur tour. Celui-ci est pour nous autres : les essayistes, les shitposteurs, et tous ceux entre les deux.",
+      "short": "Les critiques ont eu leur tour. Place à nous autres, shitposteurs compris."
+    }
   ],
   "es": [
-    "Tu reseña merece un póster. Da igual si escribes para IndieWire o si solo pusiste “hi barbie” a las 2 de la mañana: si lo dijiste, que se note.",
-    "Las palabras de los críticos acaban en los pósteres de cine. Las tuyas también deberían. Cada reseña cuenta, desde el ensayo de mil palabras hasta esa frase suelta que, sin saber por qué, te enorgullece.",
-    "No hace falta acreditación de prensa. Sea una obra maestra o un desastre, tu reseña es tuya: ponla en un póster y lúcela con orgullo.",
-    "Los críticos ya tuvieron su turno. Este es para el resto: los ensayistas, los shitposters y todos los que están en medio."
+    {
+      "text": "Tu reseña merece un póster. Da igual si escribes para IndieWire o si solo pusiste “hi barbie” a las 2 de la mañana: si lo dijiste, que se note.",
+      "short": "Tu reseña merece un póster. IndieWire o “hi barbie” a las 2: que se note."
+    },
+    {
+      "text": "Las palabras de los críticos acaban en los pósteres. Las tuyas también deberían. Cada reseña cuenta, del ensayo de mil palabras a esa frase suelta que te enorgullece.",
+      "short": "Los críticos salen en los pósteres. Tú también deberías. Cada reseña cuenta."
+    },
+    {
+      "text": "No hace falta acreditación de prensa. Sea una obra maestra o un desastre, tu reseña es tuya: ponla en un póster y lúcela con orgullo.",
+      "short": "Sin acreditación de prensa. Obra maestra o desastre, es tuya: ponla en un póster."
+    },
+    {
+      "text": "Los críticos ya tuvieron su turno. Este es para el resto: los ensayistas, los shitposters y todos los que están en medio.",
+      "short": "Los críticos ya tuvieron su turno. Ahora nos toca al resto, shitposters incluidos."
+    }
   ],
   "tr": [
-    "Yorumun bir afişi hak ediyor. IndieWire’a yazıyor olman ya da gece 2’de “hi barbie” yazıp geçmiş olman fark etmez — söylediysen, arkasında dur.",
-    "Eleştirmenlerin sözleri film afişlerine basılıyor. Seninkiler de basılmalı. Bin kelimelik denemeden garip bir şekilde gurur duyduğun tek cümlelik yoruma kadar her yorum değerli.",
-    "Basın kartı gerekmez. Yorumun ister başyapıt olsun ister tam bir kaos, o senin — afişe koy ve gururla paylaş.",
-    "Sıra eleştirmenlerdeydi. Şimdi sıra geri kalanımızda: deneme yazanlar, shitpost atanlar ve aradaki herkes."
+    {
+      "text": "Yorumun bir afişi hak ediyor. IndieWire’a yazıyor olman ya da gece 2’de “hi barbie” yazıp geçmiş olman fark etmez — söylediysen, arkasında dur.",
+      "short": "Yorumun bir afişi hak ediyor. IndieWire ya da gece 2’de “hi barbie”, arkasında dur."
+    },
+    {
+      "text": "Eleştirmenlerin sözleri afişlere basılıyor. Seninkiler de basılmalı. Bin kelimelik denemeden gurur duyduğun tek cümlelik yoruma kadar her yorum değerli.",
+      "short": "Eleştirmenlerin sözleri afişlere basılıyor. Seninkiler de. Her yorum değerli."
+    },
+    {
+      "text": "Basın kartı gerekmez. Yorumun ister başyapıt olsun ister tam bir kaos, o senin — afişe koy ve gururla paylaş.",
+      "short": "Basın kartı gerekmez. Başyapıt ya da kaos, yorumun senin. Afişe koy."
+    },
+    {
+      "text": "Sıra eleştirmenlerdeydi. Şimdi sıra geri kalanımızda: deneme yazanlar, shitpost atanlar ve aradaki herkes.",
+      "short": "Sıra eleştirmenlerdeydi. Şimdi sıra bizde, shitpost atanlar dahil."
+    }
   ],
   "it": [
-    "La tua recensione merita una locandina. Non importa se scrivi per IndieWire o se hai solo scritto “hi barbie” alle 2 di notte: se l’hai detto, rivendicalo.",
-    "Le parole dei critici finiscono sulle locandine. Anche le tue dovrebbero. Ogni recensione conta, dal saggio di mille parole alla frase secca che, chissà perché, ti rende felice.",
-    "Niente pass stampa. Che la tua recensione sia un capolavoro o un disastro, è tua: mettila su una locandina e vantatene.",
-    "I critici hanno avuto il loro turno. Questo è per tutti gli altri: i saggisti, gli shitposter e chiunque stia nel mezzo."
+    {
+      "text": "La tua recensione merita una locandina. Non importa se scrivi per IndieWire o se hai solo scritto “hi barbie” alle 2 di notte: se l’hai detto, rivendicalo.",
+      "short": "La tua recensione merita una locandina. IndieWire o “hi barbie” alle 2: rivendicala."
+    },
+    {
+      "text": "Le parole dei critici finiscono sulle locandine. Anche le tue dovrebbero. Ogni recensione conta, dal saggio di mille parole alla frase secca che, chissà perché, ti rende felice.",
+      "short": "I critici finiscono sulle locandine. Anche tu dovresti. Ogni recensione conta."
+    },
+    {
+      "text": "Niente pass stampa. Che la tua recensione sia un capolavoro o un disastro, è tua: mettila su una locandina e vantatene.",
+      "short": "Niente pass stampa. Capolavoro o disastro, è tua: mettila su una locandina."
+    },
+    {
+      "text": "I critici hanno avuto il loro turno. Questo è per tutti gli altri: i saggisti, gli shitposter e chiunque stia nel mezzo.",
+      "short": "I critici hanno avuto il loro turno. Ora tocca a noi, shitposter compresi."
+    }
   ]
 }

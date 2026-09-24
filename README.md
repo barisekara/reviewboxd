@@ -68,10 +68,17 @@ The line under the logo is picked at random from `taglines.json` on every page l
 visitor's language (falling back to English):
 
 ```json
-{ "en": ["..."], "fr": ["..."], "es": ["..."], "tr": ["..."], "it": ["..."] }
+{
+  "en": [
+    { "text": "The full tagline, shown on desktop.", "short": "A short one for phones." },
+    "A plain string works too (used everywhere)."
+  ],
+  "fr": ["..."]
+}
 ```
 
-No restart needed.
+Taglines are designed to fit in two lines: keep `text` under ~150 characters and `short`
+under ~80. No restart needed.
 
 ## Sponsor slots
 

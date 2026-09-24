@@ -122,7 +122,10 @@ async function renderIndex(template, req, res) {
   langHeaders(res, detected);
   return template
     .replace("{{LANG}}", lang)
-    .replace("{{TAGLINE}}", escapeHtml(await randomTagline(lang)))
+    .replace("{{TAGLINE}}", await (async () => {
+      const { text, short } = await randomTagline(lang);
+      return `<span class="tl-full">${escapeHtml(text)}</span><span class="tl-short">${escapeHtml(short)}</span>`;
+    })())
     .replace("{{LANG_SWITCHER}}", switcher)
     .replace("{{I18N}}", JSON.stringify(dict).replace(/</g, "\\u003c"))
     .replace(/\{\{t\.(\w+)(?::([^}]+))?\}\}/g, (_, key, arg) => escapeHtml(fill(dict[key] ?? key, { name: arg })));
@@ -133,16 +136,22 @@ const TAGLINES_FILE = join(ROOT, "taglines.json");
 const DEFAULT_TAGLINE = "Turn a Letterboxd review into a poster-worthy pull quote.";
 
 // taglines.json is { "en": [...], "fr": [...] } (a plain array is treated as English).
+// Each entry is a string, or { "text": "...", "short": "..." } where "short" is shown on phones.
 async function randomTagline(lang) {
   try {
     const data = JSON.parse(await readFile(TAGLINES_FILE, "utf8"));
-    const pick = Array.isArray(data) ? (lang === "en" ? data : []) : data[lang]?.length ? data[lang] : data.en;
-    const lines = (pick || []).filter((l) => typeof l === "string" && l.trim());
-    if (lines.length) return lines[Math.floor(Math.random() * lines.length)];
+    const pick = Array.isArray(data) ? data : data[lang]?.length ? data[lang] : data.en;
+    const lines = (pick || [])
+      .map((l) => (typeof l === "string" ? { text: l } : l))
+      .filter((l) => typeof l?.text === "string" && l.text.trim());
+    if (lines.length) {
+      const { text, short } = lines[Math.floor(Math.random() * lines.length)];
+      return { text, short: typeof short === "string" && short.trim() ? short : text };
+    }
   } catch (err) {
     if (err.code !== "ENOENT") console.warn(`taglines.json is invalid: ${err.message}`);
   }
-  return DEFAULT_TAGLINE;
+  return { text: DEFAULT_TAGLINE, short: DEFAULT_TAGLINE };
 }
 
 const UA =
