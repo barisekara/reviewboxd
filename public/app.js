@@ -53,9 +53,12 @@ function starString(rating) {
   return "★".repeat(full) + (rating % 1 ? '<span class="half">½</span>' : "");
 }
 
-function setStatus(msg, isError = false) {
+// kind: "" (info), "error" (red, the user can fix it) or "outage" (calm box, Letterboxd's fault)
+function setStatus(msg, kind = "") {
+  if (kind === true) kind = "error";
   els.status.textContent = msg;
-  els.status.classList.toggle("error", isError);
+  els.status.classList.toggle("error", kind === "error");
+  els.status.classList.toggle("outage", kind === "outage");
 }
 
 // ---------- rendering ----------
@@ -148,7 +151,11 @@ async function load(url) {
   try {
     const res = await fetch(`/api/review?url=${encodeURIComponent(url)}`);
     const data = await res.json();
-    if (!res.ok) throw new Error(I18N[`err_${data.code}`] || data.error || t("generic_error"));
+    if (!res.ok) {
+      const err = new Error(I18N[`err_${data.code}`] || data.error || t("generic_error"));
+      err.outage = data.code === "fetch";
+      throw err;
+    }
     review = data;
     els.quoteInput.value = excerpt(data.body) || data.body;
     els.useBackdrop.checked = false;
@@ -158,7 +165,7 @@ async function load(url) {
     setStatus("");
     history.replaceState(null, "", `?url=${encodeURIComponent(url)}&format=${els.card.dataset.format}`);
   } catch (err) {
-    setStatus(err.message, true);
+    setStatus(err.message, err.outage ? "outage" : "error");
   } finally {
     els.go.disabled = false;
   }

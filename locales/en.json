@@ -48,9 +48,10 @@
   "reddit_title": "{film} — {author}'s review",
   "err_invalid_url": "Paste a letterboxd.com or boxd.it review link.",
   "err_not_review": "That link doesn't look like a review.",
-  "err_fetch": "Couldn't fetch that review. Check the link and try again.",
+  "err_fetch": "Well, this is awkward. Letterboxd isn't playing along right now. Either it's down, it redecorated its review pages without telling us, or it blocked us. We're really hoping it's not that last one. If they redecorated, we'll figure it out. If it's down, we all wait together. Perfect time to finish that film you paused.",
   "read_full": "Read the full review ↗",
   "make_own": "Make your own card",
   "privacy_title": "No analytics, no tracking, no ads. Just for fun.",
-  "privacy_body": "The only cookie I set remembers your language. Share links keep a copy of the card so the link works."
+  "privacy_body": "The only cookie I set remembers your language. Share links keep a copy of the card so the link works.",
+  "err_not_found": "We couldn't find that review. Double-check the link; maybe it was deleted."
 }

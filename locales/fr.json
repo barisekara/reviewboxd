@@ -48,9 +48,10 @@
   "reddit_title": "{film} — la critique de {author}",
   "err_invalid_url": "Colle un lien de critique letterboxd.com ou boxd.it.",
   "err_not_review": "Ce lien ne ressemble pas à une critique.",
-  "err_fetch": "Impossible de récupérer cette critique. Vérifie le lien et réessaie.",
+  "err_fetch": "Bon, c'est gênant. Letterboxd ne joue pas le jeu pour le moment. Soit le site est en panne, soit ils ont refait la déco de leurs pages de critiques sans nous prévenir, soit ils nous ont bloqués. On espère très fort que ce n'est pas la dernière option. S'ils ont refait la déco, on trouvera une solution. Si c'est une panne, on attend tous ensemble. Le moment idéal pour finir ce film que tu as mis en pause.",
   "read_full": "Lire la critique complète ↗",
   "make_own": "Crée ta propre carte",
   "privacy_title": "Pas d'analytics, pas de pistage, pas de pub. Juste pour le plaisir.",
-  "privacy_body": "Le seul cookie que je dépose retient ta langue. Les liens de partage gardent une copie de la carte pour fonctionner."
+  "privacy_body": "Le seul cookie que je dépose retient ta langue. Les liens de partage gardent une copie de la carte pour fonctionner.",
+  "err_not_found": "Impossible de trouver cette critique. Vérifie le lien : elle a peut-être été supprimée."
 }

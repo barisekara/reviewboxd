@@ -197,18 +197,46 @@ function isLetterboxdUrl(raw) {
   }
 }
 
-async function scrapeReview(reviewUrl) {
-  const res = await fetch(reviewUrl, {
-    headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9" },
-    redirect: "follow",
-  });
-  if (!res.ok) throw Object.assign(new Error(`Letterboxd responded with ${res.status}`), { code: "fetch" });
+// Review pages look like /<user>/film/<slug>/ or /<user>/film/<slug>/<n>/ (repeat viewings).
+const isReviewPath = (url) => /^\/[\w.-]+\/film\/[\w-]+\/(\d+\/?)?$/.test(new URL(url).pathname.replace(/\/?$/, "/"));
+
+const fail = (code, message) => Object.assign(new Error(message), { code });
+
+// Error codes the UI translates: invalid_url, not_review, not_found, and "fetch" for anything
+// that means Letterboxd itself is down, blocking us, or changed its page layout.
+async function scrapeReview(inputUrl) {
+  // Letterboxd answers 403 when the trailing slash is missing, so always add it.
+  const normalized = new URL(inputUrl);
+  if (normalized.hostname !== "boxd.it" && !normalized.pathname.endsWith("/")) normalized.pathname += "/";
+  const reviewUrl = normalized.href;
+  if (new URL(reviewUrl).hostname !== "boxd.it" && !isReviewPath(reviewUrl)) {
+    throw fail("not_review", "That link doesn't look like a review.");
+  }
+  let res;
+  try {
+    res = await fetch(reviewUrl, {
+      headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9" },
+      redirect: "follow",
+    });
+  } catch (err) {
+    throw fail("fetch", `Letterboxd is unreachable: ${err.cause?.code || err.message}`);
+  }
+  if (res.status === 404) throw fail("not_found", "Review not found.");
+  if (!res.ok) throw fail("fetch", `Letterboxd responded with ${res.status}`);
+  // boxd.it short links are only checked once we know where they lead
+  if (!isReviewPath(res.url)) throw fail("not_review", "That link doesn't look like a review.");
   const html = await res.text();
 
+  // A review page without its JSON-LD means Letterboxd changed its layout (or served a block page).
   const ldMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
-  if (!ldMatch) throw Object.assign(new Error("Couldn't find review data on that page."), { code: "not_review" });
-  const ld = JSON.parse(ldMatch[1].replace(/\/\*\s*<!\[CDATA\[\s*\*\/|\/\*\s*\]\]>\s*\*\//g, ""));
-  if (ld["@type"] !== "Review") throw Object.assign(new Error("That link doesn't look like a review."), { code: "not_review" });
+  if (!ldMatch) throw fail("fetch", "Couldn't find review data on the page; the layout may have changed.");
+  let ld;
+  try {
+    ld = JSON.parse(ldMatch[1].replace(/\/\*\s*<!\[CDATA\[\s*\*\/|\/\*\s*\]\]>\s*\*\//g, ""));
+  } catch {
+    throw fail("fetch", "Review data on the page is malformed; the layout may have changed.");
+  }
+  if (ld["@type"] !== "Review") throw fail("not_review", "That link doesn't look like a review.");
 
   // Review text: prefer the rendered HTML body (keeps paragraphs), fall back to JSON-LD.
   let body = null;
@@ -316,7 +344,9 @@ async function handleReview(req, res, params) {
   try {
     sendJson(res, 200, await scrapeReview(target));
   } catch (err) {
-    sendJson(res, 502, { code: err.code || "fetch", error: err.message || "Failed to fetch review." });
+    const code = err.code || "fetch";
+    if (code === "fetch") console.warn(`Review fetch failed: ${err.message}`);
+    sendJson(res, code === "fetch" ? 502 : 400, { code, error: err.message || "Failed to fetch review." });
   }
 }
 

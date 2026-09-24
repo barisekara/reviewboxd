@@ -48,9 +48,10 @@
   "reddit_title": "{film} — {author} incelemesi",
   "err_invalid_url": "Bir letterboxd.com veya boxd.it inceleme bağlantısı yapıştır.",
   "err_not_review": "Bu bağlantı bir inceleme gibi görünmüyor.",
-  "err_fetch": "İnceleme alınamadı. Bağlantıyı kontrol edip tekrar dene.",
+  "err_fetch": "Eee, bu biraz garip oldu. Letterboxd şu an bize ayak uydurmuyor. Ya çöktü, ya bize haber vermeden inceleme sayfalarını yeniden dekore etti, ya da bizi engelledi. Sonuncusu olmasın diye dua ediyoruz. Yeniden dekore ettilerse bir yolunu buluruz. Çöktüyse hep birlikte bekleyeceğiz. Yarıda bıraktığın o filmi bitirmek için tam zamanı.",
   "read_full": "İncelemenin tamamını oku ↗",
   "make_own": "Kendi kartını oluştur",
   "privacy_title": "Analitik yok, takip yok, reklam yok. Tamamen eğlence için.",
-  "privacy_body": "Kullandığım tek çerez dil tercihini hatırlar. Paylaşım bağlantıları, çalışabilmeleri için kartın bir kopyasını saklar."
+  "privacy_body": "Kullandığım tek çerez dil tercihini hatırlar. Paylaşım bağlantıları, çalışabilmeleri için kartın bir kopyasını saklar.",
+  "err_not_found": "Bu incelemeyi bulamadık. Bağlantıyı kontrol et; belki silinmiştir."
 }

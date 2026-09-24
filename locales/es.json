@@ -48,9 +48,10 @@
   "reddit_title": "{film} — la reseña de {author}",
   "err_invalid_url": "Pega un enlace de reseña de letterboxd.com o boxd.it.",
   "err_not_review": "Ese enlace no parece una reseña.",
-  "err_fetch": "No se pudo obtener esa reseña. Revisa el enlace e inténtalo de nuevo.",
+  "err_fetch": "Bueno, qué incómodo. Letterboxd no está colaborando ahora mismo. O está caído, o redecoró sus páginas de reseñas sin avisarnos, o nos bloqueó. Esperamos de verdad que no sea lo último. Si redecoraron, ya lo resolveremos. Si está caído, nos toca esperar a todos juntos. Momento perfecto para terminar esa película que dejaste en pausa.",
   "read_full": "Leer la reseña completa ↗",
   "make_own": "Crea tu propia tarjeta",
   "privacy_title": "Sin analíticas, sin rastreo, sin anuncios. Solo por diversión.",
-  "privacy_body": "La única cookie que uso recuerda tu idioma. Los enlaces para compartir guardan una copia de la tarjeta para funcionar."
+  "privacy_body": "La única cookie que uso recuerda tu idioma. Los enlaces para compartir guardan una copia de la tarjeta para funcionar.",
+  "err_not_found": "No encontramos esa reseña. Revisa el enlace; quizá la borraron."
 }
