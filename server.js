@@ -336,11 +336,24 @@ async function tmdbImages(filmUrl) {
   const api = new URL(`https://api.themoviedb.org/3/${type ? type[1] : "movie"}/${id[1]}`);
   api.searchParams.set("language", "en-US");
   if (!isToken) api.searchParams.set("api_key", TMDB_API_KEY);
+  // Log the call with the key masked, never the real key.
+  const shownUrl = api.href.replace(/api_key=[^&]+/, "api_key=***");
+  console.log(`TMDB request GET ${shownUrl} film=${new URL(filmUrl).pathname}${isToken ? " auth=bearer" : ""}`);
+  const started = Date.now();
   const tmdbRes = await fetch(api, {
     headers: isToken ? { Authorization: `Bearer ${TMDB_API_KEY}` } : {},
   });
-  if (!tmdbRes.ok) throw new Error(`TMDB responded with ${tmdbRes.status}`);
+  const took = `${Date.now() - started}ms`;
+  if (!tmdbRes.ok) {
+    const body = (await tmdbRes.text().catch(() => "")).replace(/\s+/g, " ").slice(0, 300);
+    console.warn(`TMDB response ${tmdbRes.status} ${took} body=${body}`);
+    throw new Error(`TMDB responded with ${tmdbRes.status}`);
+  }
   const data = await tmdbRes.json();
+  console.log(
+    `TMDB response ${tmdbRes.status} ${took} id=${data.id} title=${JSON.stringify(data.title || data.name || "")}` +
+      ` poster=${data.poster_path || "none"} backdrop=${data.backdrop_path || "none"}`
+  );
 
   const img = (size, path) => (path ? `https://image.tmdb.org/t/p/${size}${path}` : null);
   return { poster: img("w780", data.poster_path), backdrop: img("w1280", data.backdrop_path) };

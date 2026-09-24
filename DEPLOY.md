@@ -227,8 +227,8 @@ running container doesn't see).
 **Change `.env`:** `docker compose up -d`. The container is recreated with the new values.
 
 **Logs.** Every line starts with a timestamp. Page views, review lookups (with the review link
-and the outcome, e.g. `code=rate_limited`), share-card creation and errors are logged, but never
-IP addresses. Docker keeps up to ~50 MB, then rotates.
+and the outcome, e.g. `code=rate_limited`), share-card creation, TMDB requests and responses
+(API key masked) and errors are logged, but never IP addresses. Docker keeps up to ~50 MB, then rotates.
 
 ```sh
 server$ docker compose logs -f --tail 200 reviewboxd        # follow, starting with the last 200 lines
