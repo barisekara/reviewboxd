@@ -1,0 +1,15 @@
+{
+  "name": "reviewboxd",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Turn a Letterboxd review link into a movie-poster style testimonial card",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.9"
+  }
+}

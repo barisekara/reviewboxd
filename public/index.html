@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reviewboxd</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23ffb938'/><path d='M8.5 22.5c0-5 1.8-8.6 5.6-11l1.4 1.8c-2.2 1.6-3.2 3.3-3.3 5.2h3.3v4h-7zm9.5 0c0-5 1.8-8.6 5.6-11l1.4 1.8c-2.2 1.6-3.2 3.3-3.3 5.2h3.3v4h-7z' fill='%23111'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js" defer></script>
+  <script>window.I18N = {{I18N}};</script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" />
+        <path d="M8.5 22.5c0-5 1.8-8.6 5.6-11l1.4 1.8c-2.2 1.6-3.2 3.3-3.3 5.2h3.3v4h-7zm9.5 0c0-5 1.8-8.6 5.6-11l1.4 1.8c-2.2 1.6-3.2 3.3-3.3 5.2h3.3v4h-7z" />
+      </svg>
+      <span>reviewboxd</span>
+    </div>
+    <p class="tagline">{{TAGLINE}}</p>
+  </header>
+
+  <form id="form" class="search" autocomplete="off">
+    <input id="url" type="url" required
+      placeholder="{{t.url_placeholder}}" aria-label="{{t.url_label}}" />
+    <button type="submit" id="go">{{t.create}}</button>
+  </form>
+  <p id="status" class="status" role="status"></p>
+
+  <main id="workspace" class="workspace" hidden>
+    <section class="preview">
+      <div id="stage" class="stage">
+        <div id="card" class="card" data-format="poster">
+          <div class="card-bg"><img id="bgImg" alt="" /></div>
+          <div class="card-shade"></div>
+          <div class="card-poster"><img id="posterImg" alt="" /></div>
+          <div class="card-body">
+            <div id="stars" class="stars"></div>
+            <div id="quoteBox" class="quote-box">
+              <blockquote id="quote" class="quote"></blockquote>
+            </div>
+            <div class="byline">
+              <img id="avatar" class="avatar" alt="" />
+              <div>
+                <div id="author" class="author"></div>
+                <div class="via">{{t.card_via}}</div>
+              </div>
+            </div>
+            <div class="film">
+              <!-- lang="en": titles/names aren't in the UI language; stops Turkish "i" → "İ" uppercasing -->
+              <div id="filmTitle" class="film-title" lang="en"></div>
+              <div id="filmMeta" class="film-meta" lang="en"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="controls">
+      <div class="field">
+        <span class="label">{{t.format}}</span>
+        <div class="segmented" id="formats">
+          <button type="button" data-format="poster" class="active">{{t.fmt_poster}}</button>
+          <button type="button" data-format="story">{{t.fmt_story}}</button>
+          <button type="button" data-format="wide">{{t.fmt_wide}}</button>
+        </div>
+      </div>
+
+      <label class="field">
+        <span class="label">{{t.pull_quote}}</span>
+        <textarea id="quoteInput" rows="5"></textarea>
+      </label>
+
+      <details class="field full" id="fullWrap">
+        <summary>{{t.full_review}} <span class="hint">{{t.full_review_hint}}</span></summary>
+        <div id="fullReview" class="full-review"></div>
+      </details>
+
+      <div class="field toggles">
+        <label><input type="checkbox" id="showStars" checked /> {{t.stars}}</label>
+        <label><input type="checkbox" id="showFilm" checked /> {{t.film_title}}</label>
+        <label><input type="checkbox" id="useBackdrop" /> {{t.backdrop}}</label>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="share" class="primary" hidden>{{t.share_image}}</button>
+        <button type="button" id="download" class="primary">{{t.download}}</button>
+      </div>
+      <p id="shareHint" class="share-hint" hidden>{{t.share_hint}}</p>
+
+      <div class="field">
+        <span class="label">{{t.share_link}}</span>
+        <div class="socials" id="socials">
+          <button type="button" data-target="x" title="{{t.share_on:X}}" aria-label="{{t.share_on:X}}"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/x.svg" alt="" /></button>
+          <button type="button" data-target="bluesky" title="{{t.share_on:Bluesky}}" aria-label="{{t.share_on:Bluesky}}"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/bluesky.svg" alt="" /></button>
+          <button type="button" data-target="threads" title="{{t.share_on:Threads}}" aria-label="{{t.share_on:Threads}}"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/threads.svg" alt="" /></button>
+          <button type="button" data-target="facebook" title="{{t.share_on:Facebook}}" aria-label="{{t.share_on:Facebook}}"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/facebook.svg" alt="" /></button>
+          <button type="button" data-target="reddit" title="{{t.share_on:Reddit}}" aria-label="{{t.share_on:Reddit}}"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/reddit.svg" alt="" /></button>
+          <button type="button" data-target="whatsapp" title="{{t.share_on:WhatsApp}}" aria-label="{{t.share_on:WhatsApp}}"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/whatsapp.svg" alt="" /></button>
+          <button type="button" data-target="copy" title="{{t.copy_link}}" aria-label="{{t.copy_link}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+        </div>
+        <span class="share-hint left">{{t.share_link_hint}}</span>
+      </div>
+
+      <a id="sourceLink" class="source" target="_blank" rel="noopener">{{t.view_original}}</a>
+      <p id="tmdbCredit" class="credit" hidden>
+        {{t.tmdb_images}} <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>.
+        This product uses the TMDB API but is not endorsed or certified by TMDB.
+      </p>
+    </aside>
+  </main>
+
+  <footer id="support" class="support">
+    <p id="supportTitle" class="support-title" hidden>{{t.support_title}}</p>
+    <div id="supportTiles" class="support-tiles" hidden>
+      <a id="coffeeTile" class="support-tile coffee" target="_blank" rel="noopener" hidden>
+        <span class="support-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/buymeacoffee.svg" alt="" /></span>
+        <span>
+          <strong>{{t.coffee_title}}</strong>
+          <small>{{t.coffee_sub}}</small>
+        </span>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+      <a id="sponsorTile" class="support-tile sponsor" target="_blank" rel="noopener" hidden>
+        <span class="support-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@13/icons/githubsponsors.svg" alt="" /></span>
+        <span>
+          <strong>{{t.sponsor_title}}</strong>
+          <small>{{t.sponsor_sub}}</small>
+        </span>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <p class="support-title sponsors-title">{{t.sponsors}}</p>
+    <div id="sponsorSlots" class="sponsor-slots"></div>
+
+    <nav id="langs" class="langs" aria-label="{{t.language}}">{{LANG_SWITCHER}}</nav>
+  </footer>
+</body>
+</html>
