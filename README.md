@@ -20,6 +20,9 @@ npm start        # or: npm run dev (auto-restart on change)
 
 Open http://localhost:3000. No dependencies, just Node 22.9+.
 
+Or with Docker: `docker compose up -d --build`. To put it on a server behind Cloudflare, follow
+[DEPLOY.md](DEPLOY.md).
+
 ## Configuration
 
 Copy `.env.example` to `.env` (it's loaded automatically) or set real environment variables:

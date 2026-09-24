@@ -513,7 +513,7 @@ async function route(req, res) {
   return serveStatic(req, res, pathname);
 }
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
   try {
     await route(req, res);
   } catch (err) {
@@ -521,7 +521,14 @@ createServer(async (req, res) => {
     if (!res.headersSent) res.writeHead(500);
     res.end();
   }
-}).listen(PORT, () => {
+});
+
+// Docker sends SIGTERM on stop; close cleanly instead of waiting to be killed.
+for (const signal of ["SIGTERM", "SIGINT"]) {
+  process.on(signal, () => server.close(() => process.exit(0)));
+}
+
+server.listen(PORT, () => {
   console.log(`reviewboxd running at http://localhost:${PORT}`);
   if (POSTER_SOURCE === "tmdb" && !TMDB_API_KEY) {
     console.warn("POSTER_SOURCE=tmdb but TMDB_API_KEY is not set; falling back to Letterboxd images.");
