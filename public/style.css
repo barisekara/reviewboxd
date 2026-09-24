@@ -206,6 +206,13 @@ a.sponsor-slot.empty:hover strong { opacity: 1; }
 .made-by { margin: 14px 0 0; font-size: 13px; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 5px; }
 .made-by a { color: var(--text); text-decoration: none; }
 .made-by a:hover { color: var(--accent); }
+.made-by .sep { margin: 0 4px; }
+.made-by .opus { display: inline-flex; align-items: center; gap: 4px; }
+.claude-icon {
+  width: 14px; height: 14px; background: #d97757;
+  -webkit-mask: url("https://cdn.jsdelivr.net/npm/simple-icons@13/icons/claude.svg") center / contain no-repeat;
+  mask: url("https://cdn.jsdelivr.net/npm/simple-icons@13/icons/claude.svg") center / contain no-repeat;
+}
 .made-by .gh { display: inline-flex; margin-left: 8px; opacity: .7; transition: opacity .15s; }
 .made-by .gh:hover { opacity: 1; }
 .made-by .gh img { width: 16px; height: 16px; filter: invert(1); }
