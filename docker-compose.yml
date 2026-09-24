@@ -4,6 +4,9 @@ services:
     image: reviewboxd
     container_name: reviewboxd
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" } # keep ~50 MB of logs, then rotate
     env_file:
       - path: .env
         required: false

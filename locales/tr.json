@@ -54,5 +54,6 @@
   "privacy_title": "Analitik yok, takip yok, reklam yok. Tamamen eğlence için.",
   "privacy_body": "Kullandığım tek çerez dil tercihini hatırlar. Paylaşım bağlantıları, çalışabilmeleri için kartın bir kopyasını saklar.",
   "err_not_found": "Bu incelemeyi bulamadık. Bağlantıyı kontrol et; belki silinmiştir.",
-  "legal": "Bağımsız bir hayran projesi, Letterboxd ile bağlantısı yoktur."
+  "legal": "Bağımsız bir hayran projesi, Letterboxd ile bağlantısı yoktur.",
+  "err_rate_limited": "Letterboxd'la aramız kötü olsun istemiyoruz. Yeni bir poster için biraz sonra tekrar dene."
 }

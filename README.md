@@ -33,6 +33,7 @@ Copy `.env.example` to `.env` (it's loaded automatically) or set real environmen
 | `TMDB_API_KEY` | none | Required for `tmdb`. v3 API key or v4 read access token |
 | `BMC_USERNAME` | none | Shows a "Buy me a coffee" tile linking to buymeacoffee.com/&lt;name&gt; |
 | `GITHUB_SPONSORS_USERNAME` | none | Shows a "Become a sponsor" tile linking to github.com/sponsors/&lt;name&gt; |
+| `RATE_LIMIT_PER_MINUTE` | `5` | Review lookups allowed per visitor IP per minute |
 | `PORT` | `3000` | |
 
 With `tmdb`, the TMDB id is read from the Letterboxd film page (no title guessing). If the
@@ -129,7 +130,12 @@ reviewboxd is a just-for-fun project and collects nothing about its visitors:
 - **Share links store a card.** If you use the X / Bluesky / Facebook / … buttons, the card
   image, quote, film title, review link and creation date are saved on the server so the link can show a
   preview. Nothing else is attached (no IP address, no identifier).
-- **No request logging.** The server only logs errors.
+- **Logs contain no IP addresses.** The server logs each page view and review lookup
+  (time, path, status, duration, and for lookups the review link) plus errors, but never who
+  made the request.
+- **Rate limiting keeps your IP in memory for one minute.** To avoid hammering Letterboxd, each IP
+  address gets `RATE_LIMIT_PER_MINUTE` review lookups per minute (default 5). The address is held
+  only in memory to count requests, dropped after a minute, and never written to disk or logs.
 
 Third parties: fonts load from Google Fonts, and icons plus the image export library load
 from jsDelivr, so those services see your IP address when the page loads. Images from

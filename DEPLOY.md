@@ -226,11 +226,19 @@ running container doesn't see).
 
 **Change `.env`:** `docker compose up -d`. The container is recreated with the new values.
 
-**Logs**
+**Logs.** Every line starts with a timestamp. Page views, review lookups (with the review link
+and the outcome, e.g. `code=rate_limited`), share-card creation and errors are logged, but never
+IP addresses. Docker keeps up to ~50 MB, then rotates.
 
 ```sh
-server$ docker compose logs -f reviewboxd
+server$ docker compose logs -f --tail 200 reviewboxd        # follow, starting with the last 200 lines
+server$ docker compose logs --since 1h reviewboxd           # everything from the last hour
+server$ docker compose logs reviewboxd | grep code=         # only failed or limited lookups
 ```
+
+**Rate limit.** Each visitor IP gets `RATE_LIMIT_PER_MINUTE` review lookups per minute (default 5).
+Change it in `.env`, then run `docker compose up -d`. The limit relies on Cloudflare's
+`CF-Connecting-IP` header, which the tunnel and reverse proxies pass through automatically.
 
 **Back up saved share cards:** they live in the `reviewboxd_cards` Docker volume.
 

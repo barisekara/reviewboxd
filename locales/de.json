@@ -54,5 +54,6 @@
   "privacy_title": "Keine Analytics, kein Tracking, keine Werbung. Einfach nur zum Spaß.",
   "privacy_body": "Das einzige Cookie, das ich setze, merkt sich deine Sprache. Geteilte Links speichern eine Kopie der Karte, damit der Link funktioniert.",
   "err_not_found": "Wir konnten diese Rezension nicht finden. Prüf den Link noch mal; vielleicht wurde sie gelöscht.",
-  "legal": "Unabhängiges Fanprojekt, nicht mit Letterboxd verbunden."
+  "legal": "Unabhängiges Fanprojekt, nicht mit Letterboxd verbunden.",
+  "err_rate_limited": "Wir wollen es uns mit Letterboxd nicht verscherzen. Versuch es gleich noch mal für ein neues Poster."
 }

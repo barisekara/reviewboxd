@@ -54,5 +54,6 @@
   "privacy_title": "Niente analytics, niente tracciamento, niente pubblicità. Solo per divertimento.",
   "privacy_body": "L'unico cookie che uso ricorda la tua lingua. I link di condivisione conservano una copia della card per funzionare.",
   "err_not_found": "Non troviamo questa recensione. Controlla il link: forse è stata eliminata.",
-  "legal": "Progetto indipendente di fan, non affiliato a Letterboxd."
+  "legal": "Progetto indipendente di fan, non affiliato a Letterboxd.",
+  "err_rate_limited": "Non vogliamo litigare con Letterboxd. Riprova tra poco per una nuova locandina."
 }

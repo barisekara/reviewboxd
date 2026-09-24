@@ -4,6 +4,12 @@ import { randomBytes } from "node:crypto";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Prefix every log line with an ISO timestamp and level (docker logs shows no time by default).
+for (const [method, level] of [["log", "INFO "], ["warn", "WARN "], ["error", "ERROR"]]) {
+  const original = console[method].bind(console);
+  console[method] = (...args) => original(new Date().toISOString(), level, ...args);
+}
+
 const PORT = process.env.PORT || 3000;
 const ROOT = fileURLToPath(new URL(".", import.meta.url));
 const PUBLIC_DIR = join(ROOT, "public");
@@ -340,6 +346,41 @@ async function tmdbImages(filmUrl) {
   return { poster: img("w780", data.poster_path), backdrop: img("w1280", data.backdrop_path) };
 }
 
+// ---------- rate limiting ----------
+// Each review lookup hits Letterboxd, so limit it per visitor: RATE_LIMIT_PER_MINUTE requests in
+// any 60-second window. IPs live only in this in-memory map for a minute; they're never logged.
+
+const RATE_LIMIT = Math.max(1, Number(process.env.RATE_LIMIT_PER_MINUTE) || 5);
+const RATE_WINDOW_MS = 60_000;
+const hits = new Map(); // ip -> timestamps of recent lookups
+
+// Behind Cloudflare the visitor's IP is in CF-Connecting-IP; the socket address is the tunnel/proxy.
+function clientIp(req) {
+  return (
+    req.headers["cf-connecting-ip"] ||
+    String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
+    req.socket.remoteAddress
+  );
+}
+
+// Returns 0 if allowed (and records the hit), otherwise the seconds until the next slot frees up.
+function rateLimit(ip) {
+  const now = Date.now();
+  const recent = (hits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT) {
+    hits.set(ip, recent);
+    return Math.ceil((recent[0] + RATE_WINDOW_MS - now) / 1000);
+  }
+  recent.push(now);
+  hits.set(ip, recent);
+  return 0;
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, times] of hits) if (times.every((t) => now - t >= RATE_WINDOW_MS)) hits.delete(ip);
+}, RATE_WINDOW_MS).unref();
+
 // ---------- HTTP ----------
 
 function sendJson(res, status, data) {
@@ -349,13 +390,23 @@ function sendJson(res, status, data) {
 
 async function handleReview(req, res, params) {
   const target = (params.get("url") || "").trim();
+  res.logNote = `url=${target.slice(0, 200)}`;
   if (!isLetterboxdUrl(target)) {
+    res.logNote += " code=invalid_url";
     return sendJson(res, 400, { code: "invalid_url", error: "Paste a letterboxd.com or boxd.it review link." });
+  }
+  // Only lookups that would reach Letterboxd count towards the limit.
+  const retryAfter = rateLimit(clientIp(req));
+  if (retryAfter) {
+    res.logNote += " code=rate_limited";
+    res.setHeader("Retry-After", retryAfter);
+    return sendJson(res, 429, { code: "rate_limited", error: "Too many lookups, try again shortly." });
   }
   try {
     sendJson(res, 200, await scrapeReview(target));
   } catch (err) {
     const code = err.code || "fetch";
+    res.logNote += ` code=${code}`;
     if (code === "fetch") console.warn(`Review fetch failed: ${err.message}`);
     sendJson(res, code === "fetch" ? 502 : 400, { code, error: err.message || "Failed to fetch review." });
   }
@@ -434,6 +485,7 @@ async function handleCreateCard(req, res) {
   await mkdir(CARDS_DIR, { recursive: true });
   await writeFile(join(CARDS_DIR, `${id}.jpg`), image);
   await writeFile(join(CARDS_DIR, `${id}.json`), JSON.stringify(meta));
+  res.logNote = `card=${id}`;
   sendJson(res, 201, { id, url: `${baseUrl(req)}/c/${id}` });
 }
 
@@ -516,7 +568,18 @@ async function route(req, res) {
   return serveStatic(req, res, pathname);
 }
 
+// Request log without IPs or identifiers. Static files, image proxy and config calls are skipped as noise.
+const isLoggedPath = (p) => p === "/" || p.startsWith("/api/review") || p.startsWith("/api/cards") || p.startsWith("/c/");
+
 const server = createServer(async (req, res) => {
+  const started = Date.now();
+  const path = (req.url || "/").split("?")[0];
+  if (isLoggedPath(path)) {
+    res.on("finish", () => {
+      const note = res.logNote ? ` ${res.logNote}` : "";
+      console.log(`${req.method} ${path} ${res.statusCode} ${Date.now() - started}ms${note}`);
+    });
+  }
   try {
     await route(req, res);
   } catch (err) {
