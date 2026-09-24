@@ -52,7 +52,7 @@ required attribution when TMDB images are used.
 
 ## Languages
 
-English, French, Spanish, Turkish and Italian. The language is chosen in this order:
+English, French, Spanish, Turkish, Italian and German. The language is chosen in this order:
 
 1. `?lang=xx` (from the footer switcher), remembered in a `lang` cookie
 2. the `lang` cookie

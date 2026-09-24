@@ -88,5 +88,23 @@
       "text": "I critici hanno avuto il loro turno. Questo è per tutti gli altri: i saggisti, gli shitposter e chiunque stia nel mezzo.",
       "short": "I critici hanno avuto il loro turno. Ora tocca a noi, shitposter compresi."
     }
+  ],
+  "de": [
+    {
+      "text": "Deine Rezension verdient ein Poster. Egal, ob du für IndieWire schreibst oder um 2 Uhr nachts nur „hi barbie“ getippt hast: Wenn du es gesagt hast, steh dazu.",
+      "short": "Deine Rezension verdient ein Poster. IndieWire oder „hi barbie“ um 2 Uhr: steh dazu."
+    },
+    {
+      "text": "Kritiker landen mit ihren Worten auf Filmpostern. Du auch. Jede Rezension zählt, vom langen Essay bis zum Einzeiler, auf den du komisch stolz bist.",
+      "short": "Kritiker landen auf Filmpostern. Du auch. Jede Rezension zählt."
+    },
+    {
+      "text": "Kein Presseausweis nötig. Ob Meisterwerk oder Chaos, deine Rezension gehört dir: Pack sie auf ein Poster und sei stolz darauf.",
+      "short": "Kein Presseausweis nötig. Meisterwerk oder Chaos, ab damit aufs Poster."
+    },
+    {
+      "text": "Die Kritiker hatten ihren Auftritt. Jetzt sind wir anderen dran: die Essayisten, die Shitposter und alle dazwischen.",
+      "short": "Die Kritiker hatten ihren Auftritt. Jetzt sind wir dran, Shitposter inklusive."
+    }
   ]
 }
