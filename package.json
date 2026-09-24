@@ -4,6 +4,15 @@
   "private": true,
   "description": "Turn a Letterboxd review link into a movie-poster style testimonial card",
   "license": "MIT",
+  "author": "Bar\u0131\u015f <https://baris.wtf>",
+  "homepage": "https://github.com/barisekara/reviewboxd#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/barisekara/reviewboxd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/barisekara/reviewboxd/issues"
+  },
   "type": "module",
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",

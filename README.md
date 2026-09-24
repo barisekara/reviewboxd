@@ -3,6 +3,13 @@
 Paste a Letterboxd review link and get a movie-poster style testimonial card:
 the film poster, the star rating, a pull quote from the review, and the reviewer.
 
+No press pass required. Whether your review is a masterpiece or a mess, it's yours: put it on
+a poster and be proud of it.
+
+Made by [Barış](https://baris.wtf) · Contributions welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+<a href="https://buymeacoffee.com/barisekara"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="40"></a>
+
 ## Run
 
 ```sh
@@ -95,6 +102,16 @@ placeholder. If `contact` is set (`mailto:` or `https://`), empty slots link to 
 Share a preset by link: `/?url=<review link>&format=poster|story|wide`.
 
 This depends on scraping Letterboxd's HTML, so it can break if they change their markup.
+
+## Contributing
+
+Contributions are welcome: bug fixes, new card designs, translation fixes and new languages.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started, then open an issue or a pull request.
+
+## Support
+
+If reviewboxd made you smile, you can [buy me a coffee](https://buymeacoffee.com/barisekara).
+It helps keep the site online. More of my work is at [baris.wtf](https://baris.wtf).
 
 ## Disclaimer
 

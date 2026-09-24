@@ -183,6 +183,11 @@ a.sponsor-slot.empty:hover strong { opacity: 1; }
 .langs a:hover { color: var(--text); }
 .langs a[aria-current] { color: var(--accent); font-weight: 600; }
 
+.made-by { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+.made-by a { color: var(--text); text-decoration: none; }
+.made-by a:hover { color: var(--accent); }
+.made-by span { margin: 0 6px; }
+
 /* shared card page (/c/:id) */
 .card-page { display: grid; place-items: center; align-content: center; gap: 16px; }
 .shared-card { width: 100%; max-width: 1100px; border-radius: var(--radius); box-shadow: 0 30px 80px rgba(0,0,0,.5); }
