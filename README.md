@@ -34,6 +34,9 @@ Copy `.env.example` to `.env` (it's loaded automatically) or set real environmen
 | `BMC_USERNAME` | none | Shows a "Buy me a coffee" tile linking to buymeacoffee.com/&lt;name&gt; |
 | `GITHUB_SPONSORS_USERNAME` | none | Shows a "Become a sponsor" tile linking to github.com/sponsors/&lt;name&gt; |
 | `RATE_LIMIT_PER_MINUTE` | `5` | Review lookups allowed per visitor IP per minute |
+| `CARD_RATE_LIMIT_PER_MINUTE` | `5` | Share-link uploads per visitor IP per minute |
+| `IMAGE_RATE_LIMIT_PER_MINUTE` | `120` | Proxied poster/avatar images per visitor IP per minute |
+| `MAX_CARDS_STORAGE_MB` | `1024` | Total disk space for share cards; uploads pause when full |
 | `PORT` | `3000` | |
 
 With `tmdb`, the TMDB id is read from the Letterboxd film page (no title guessing). If the
@@ -136,9 +139,10 @@ reviewboxd is a just-for-fun project and collects nothing about its visitors:
 - **Logs contain no IP addresses.** The server logs each page view and review lookup
   (time, path, status, duration, and for lookups the review link) plus errors, but never who
   made the request.
-- **Rate limiting keeps your IP in memory for one minute.** To avoid hammering Letterboxd, each IP
-  address gets `RATE_LIMIT_PER_MINUTE` review lookups per minute (default 5). The address is held
-  only in memory to count requests, dropped after a minute, and never written to disk or logs.
+- **Rate limiting keeps your IP in memory for one minute.** To avoid hammering Letterboxd and to
+  stop abuse, review lookups, share-link uploads and proxied images are counted per IP address (per
+  /64 for IPv6). The address is held only in memory to count requests, dropped after a minute, and
+  never written to disk or logs.
 
 Third parties: fonts load from Google Fonts, and icons plus the image export library load
 from jsDelivr, so those services see your IP address when the page loads. Images from

@@ -325,7 +325,7 @@ async function createShareLink() {
       }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || t("upload_failed"));
+    if (!res.ok) throw new Error(I18N[`err_${data.code}`] || t("upload_failed"));
     sharedLink = data.url;
     return sharedLink;
   } finally {
@@ -456,7 +456,8 @@ for (const a of $("langs").querySelectorAll("a")) {
 const params = new URLSearchParams(location.search);
 const initial = params.get("url");
 // On phones that can share, default to the Stories-sized card.
-const startFormat = params.get("format") || (canShareFiles ? "story" : null);
+const requested = params.get("format");
+const startFormat = ["poster", "story", "wide"].includes(requested) ? requested : canShareFiles ? "story" : null;
 els.formats.querySelector(`[data-format="${startFormat}"]`)?.click();
 if (initial) {
   els.url.value = initial;

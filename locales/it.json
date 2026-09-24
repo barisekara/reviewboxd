@@ -56,5 +56,6 @@
   "err_not_found": "Non troviamo questa recensione. Controlla il link: forse è stata eliminata.",
   "legal": "Progetto indipendente di fan, non affiliato a Letterboxd.",
   "err_rate_limited": "Non vogliamo litigare con Letterboxd. Riprova tra poco per una nuova locandina.",
-  "err_too_old": "È la recensione di una nuova visione, e per queste Letterboxd ci lascia leggere solo le 50 voci più recenti del diario. Questa è più vecchia, scusa! La sua prima recensione del film funziona sempre."
+  "err_too_old": "È la recensione di una nuova visione, e per queste Letterboxd ci lascia leggere solo le 50 voci più recenti del diario. Questa è più vecchia, scusa! La sua prima recensione del film funziona sempre.",
+  "err_storage_full": "I link di condivisione sono in pausa al momento. Scarica il PNG e condividi quello."
 }

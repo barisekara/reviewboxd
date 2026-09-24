@@ -56,5 +56,6 @@
   "err_not_found": "Bu incelemeyi bulamadık. Bağlantıyı kontrol et; belki silinmiştir.",
   "legal": "Bağımsız bir hayran projesi, Letterboxd ile bağlantısı yoktur.",
   "err_rate_limited": "Letterboxd'la aramız kötü olsun istemiyoruz. Yeni bir poster için biraz sonra tekrar dene.",
-  "err_too_old": "Bu, filmin tekrar izlenmesine ait bir inceleme; Letterboxd bunlar için yalnızca son 50 günlük kaydını okumamıza izin veriyor. Bu daha eski, kusura bakma! Filme yazdığı ilk inceleme her zaman çalışır."
+  "err_too_old": "Bu, filmin tekrar izlenmesine ait bir inceleme; Letterboxd bunlar için yalnızca son 50 günlük kaydını okumamıza izin veriyor. Bu daha eski, kusura bakma! Filme yazdığı ilk inceleme her zaman çalışır.",
+  "err_storage_full": "Paylaşım bağlantıları şu an mola veriyor. PNG'yi indirip onu paylaş."
 }

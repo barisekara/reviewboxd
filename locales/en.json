@@ -56,5 +56,6 @@
   "err_not_found": "We couldn't find that review. Double-check the link; maybe it was deleted.",
   "legal": "Independent fan project, not affiliated with Letterboxd.",
   "err_rate_limited": "We don't want to get on Letterboxd's bad side. Try again in a minute for a new poster.",
-  "err_too_old": "This is a repeat review of the film, and for those Letterboxd only lets us read a reviewer's 50 most recent diary entries. This one is older, sorry! Their first review of the film works any time."
+  "err_too_old": "This is a repeat review of the film, and for those Letterboxd only lets us read a reviewer's 50 most recent diary entries. This one is older, sorry! Their first review of the film works any time.",
+  "err_storage_full": "Share links are taking a break right now. Download the PNG and share that instead."
 }

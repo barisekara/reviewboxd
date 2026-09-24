@@ -236,9 +236,16 @@ server$ docker compose logs --since 1h reviewboxd           # everything from th
 server$ docker compose logs reviewboxd | grep code=         # only failed or limited lookups
 ```
 
-**Rate limit.** Each visitor IP gets `RATE_LIMIT_PER_MINUTE` review lookups per minute (default 5).
-Change it in `.env`, then run `docker compose up -d`. The limit relies on Cloudflare's
-`CF-Connecting-IP` header, which the tunnel and reverse proxies pass through automatically.
+**Rate limits.** Per visitor IP and minute: `RATE_LIMIT_PER_MINUTE` review lookups (default 5),
+`CARD_RATE_LIMIT_PER_MINUTE` share-link uploads (5) and `IMAGE_RATE_LIMIT_PER_MINUTE` proxied
+images (120). Share cards stop being accepted once they use `MAX_CARDS_STORAGE_MB` (1024).
+Change them in `.env`, then run `docker compose up -d`.
+
+The limits identify visitors by Cloudflare's `CF-Connecting-IP` header, which is only trustworthy if
+**every** request comes through Cloudflare. With option A (tunnel) that's automatic. With option B,
+make sure the server only accepts ports 80/443 from
+[Cloudflare's IP ranges](https://www.cloudflare.com/ips/), or anyone who finds the server's IP can
+send a fake header and dodge the limits.
 
 **Back up saved share cards:** they live in the `reviewboxd_cards` Docker volume.
 

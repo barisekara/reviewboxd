@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -70,8 +70,15 @@ const LANG_BY_COUNTRY = Object.fromEntries(
 );
 
 function parseCookies(header = "") {
+  const decode = (v) => {
+    try {
+      return decodeURIComponent(v);
+    } catch {
+      return ""; // a malformed cookie (e.g. set by a sibling subdomain) must not break the page
+    }
+  };
   return Object.fromEntries(
-    header.split(";").map((p) => p.trim().split("=")).filter(([k, v]) => k && v).map(([k, v]) => [k, decodeURIComponent(v)])
+    header.split(";").map((p) => p.trim().split("=")).filter(([k, v]) => k && v).map(([k, v]) => [k, decode(v)])
   );
 }
 
@@ -119,6 +126,21 @@ function langHeaders(res, { lang, fromQuery }) {
   if (fromQuery) res.setHeader("Set-Cookie", `lang=${lang}; Path=/; Max-Age=31536000; SameSite=Lax`);
 }
 
+const indexCsp = (nonce) =>
+  [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net`,
+    "style-src 'self' https://fonts.googleapis.com",
+    "font-src https://fonts.gstatic.com",
+    "img-src 'self' data: blob: https://cdn.jsdelivr.net",
+    // html-to-image fetches fonts and images again to embed them in the exported PNG
+    "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net",
+    "frame-ancestors 'none'",
+    "base-uri 'none'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ].join("; ");
+
 async function renderIndex(template, req, res) {
   const detected = detectLang(req);
   const { lang } = detected;
@@ -128,7 +150,11 @@ async function renderIndex(template, req, res) {
     (l) => `<a href="?lang=${l}" hreflang="${l}" lang="${l}"${l === lang ? ' aria-current="true"' : ""}>${escapeHtml(names[l])}</a>`
   ).join("");
   langHeaders(res, detected);
+  // The only inline script (translations) runs via a per-request nonce; everything else must be a file.
+  const nonce = randomBytes(16).toString("base64");
+  res.setHeader("Content-Security-Policy", indexCsp(nonce));
   return template
+    .replace("{{NONCE}}", nonce)
     .replace("{{LANG}}", lang)
     .replace("{{TAGLINE}}", await (async () => {
       const { text, short } = await randomTagline(lang);
@@ -205,13 +231,21 @@ function meta(html, key) {
   return m ? decodeEntities(m[1]) : null;
 }
 
-function isLetterboxdUrl(raw) {
+// Returns a clean https://letterboxd.com/... or https://boxd.it/... URL, or null for anything else.
+// Rebuilding the URL (instead of reusing the input) drops other schemes like javascript:,
+// credentials, ports, query strings and fragments.
+function canonicalLetterboxdUrl(raw) {
+  let u;
   try {
-    const u = new URL(raw);
-    return /^(www\.)?letterboxd\.com$|^boxd\.it$/.test(u.hostname);
+    u = new URL(String(raw));
   } catch {
-    return false;
+    return null;
   }
+  if (!["https:", "http:"].includes(u.protocol) || u.username || u.password || u.port) return null;
+  const host = u.hostname.toLowerCase();
+  if (host === "letterboxd.com" || host === "www.letterboxd.com") return `https://letterboxd.com${u.pathname}`;
+  if (host === "boxd.it") return `https://boxd.it${u.pathname}`;
+  return null;
 }
 
 // Review pages look like /<user>/film/<slug>/ or /<user>/film/<slug>/<n>/ (repeat viewings).
@@ -223,7 +257,7 @@ const fail = (code, message) => Object.assign(new Error(message), { code });
 // that means Letterboxd itself is down, blocking us, or changed its page layout.
 async function scrapeReview(inputUrl) {
   // Letterboxd answers 403 when the trailing slash is missing, so always add it.
-  const normalized = new URL(inputUrl);
+  const normalized = new URL(canonicalLetterboxdUrl(inputUrl));
   if (normalized.hostname !== "boxd.it" && !normalized.pathname.endsWith("/")) normalized.pathname += "/";
   const reviewUrl = normalized.href;
   if (new URL(reviewUrl).hostname !== "boxd.it" && !isReviewPath(reviewUrl)) {
@@ -246,7 +280,9 @@ async function scrapeReview(inputUrl) {
   }
   if (!res.ok) throw fail("fetch", `Letterboxd responded with ${res.status}`);
   // boxd.it short links are only checked once we know where they lead
-  if (!isReviewPath(res.url)) throw fail("not_review", "That link doesn't look like a review.");
+  if (new URL(res.url).hostname !== "letterboxd.com" || !isReviewPath(res.url)) {
+    throw fail("not_review", "That link doesn't look like a review.");
+  }
   const html = await res.text();
 
   // A review page without its JSON-LD means Letterboxd changed its layout (or served a block page).
@@ -449,36 +485,60 @@ async function tmdbImages(filmUrl) {
 // Each review lookup hits Letterboxd, so limit it per visitor: RATE_LIMIT_PER_MINUTE requests in
 // any 60-second window. IPs live only in this in-memory map for a minute; they're never logged.
 
-const RATE_LIMIT = Math.max(1, Number(process.env.RATE_LIMIT_PER_MINUTE) || 5);
 const RATE_WINDOW_MS = 60_000;
-const hits = new Map(); // ip -> timestamps of recent lookups
+const limitFromEnv = (name, fallback) => Math.max(1, Number(process.env[name]) || fallback);
 
 // Behind Cloudflare the visitor's IP is in CF-Connecting-IP; the socket address is the tunnel/proxy.
+// Only trustworthy when the app is reachable solely through Cloudflare (see DEPLOY.md).
 function clientIp(req) {
-  return (
+  const ip =
     req.headers["cf-connecting-ip"] ||
     String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
-    req.socket.remoteAddress
-  );
+    req.socket.remoteAddress ||
+    "";
+  return rateKey(String(ip).trim());
 }
 
-// Returns 0 if allowed (and records the hit), otherwise the seconds until the next slot frees up.
-function rateLimit(ip) {
-  const now = Date.now();
-  const recent = (hits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS);
-  if (recent.length >= RATE_LIMIT) {
-    hits.set(ip, recent);
-    return Math.ceil((recent[0] + RATE_WINDOW_MS - now) / 1000);
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  return 0;
+// One IPv6 user usually controls a whole /64, so count per /64 instead of per address.
+function rateKey(ip) {
+  if (!ip.includes(":") || /^::ffff:\d+\.\d+\.\d+\.\d+$/i.test(ip)) return ip.replace(/^::ffff:/i, "");
+  const [head, tail = ""] = ip.split("::");
+  const left = head ? head.split(":") : [];
+  const right = tail ? tail.split(":") : [];
+  const groups = [...left, ...Array(Math.max(0, 8 - left.length - right.length)).fill("0"), ...right];
+  return `${groups.slice(0, 4).join(":")}::/64`;
 }
 
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, times] of hits) if (times.every((t) => now - t >= RATE_WINDOW_MS)) hits.delete(ip);
-}, RATE_WINDOW_MS).unref();
+// Sliding-window limiter: returns 0 if allowed (and records the hit), otherwise the seconds until
+// the next slot frees up. Keys live only in memory for a minute; they're never logged.
+function createLimiter(limit) {
+  const hits = new Map();
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, times] of hits) if (times.every((t) => now - t >= RATE_WINDOW_MS)) hits.delete(key);
+  }, RATE_WINDOW_MS).unref();
+  return (key) => {
+    const now = Date.now();
+    const recent = (hits.get(key) || []).filter((t) => now - t < RATE_WINDOW_MS);
+    if (recent.length >= limit) {
+      hits.set(key, recent);
+      return Math.ceil((recent[0] + RATE_WINDOW_MS - now) / 1000);
+    }
+    recent.push(now);
+    hits.set(key, recent);
+    return 0;
+  };
+}
+
+const lookupLimiter = createLimiter(limitFromEnv("RATE_LIMIT_PER_MINUTE", 5));
+const cardLimiter = createLimiter(limitFromEnv("CARD_RATE_LIMIT_PER_MINUTE", 5));
+const imageLimiter = createLimiter(limitFromEnv("IMAGE_RATE_LIMIT_PER_MINUTE", 120));
+
+function tooMany(res, retryAfter) {
+  res.logNote = `${res.logNote ? `${res.logNote} ` : ""}code=rate_limited`;
+  res.setHeader("Retry-After", retryAfter);
+  sendJson(res, 429, { code: "rate_limited", error: "Too many requests, try again shortly." });
+}
 
 // ---------- HTTP ----------
 
@@ -488,14 +548,15 @@ function sendJson(res, status, data) {
 }
 
 async function handleReview(req, res, params) {
-  const target = (params.get("url") || "").trim();
-  res.logNote = `url=${target.slice(0, 200)}`;
-  if (!isLetterboxdUrl(target)) {
+  const raw = (params.get("url") || "").trim();
+  res.logNote = `url=${raw.slice(0, 200)}`;
+  const target = canonicalLetterboxdUrl(raw);
+  if (!target) {
     res.logNote += " code=invalid_url";
     return sendJson(res, 400, { code: "invalid_url", error: "Paste a letterboxd.com or boxd.it review link." });
   }
   // Only lookups that would reach Letterboxd count towards the limit.
-  const retryAfter = rateLimit(clientIp(req));
+  const retryAfter = lookupLimiter(clientIp(req));
   if (retryAfter) {
     res.logNote += " code=rate_limited";
     res.setHeader("Retry-After", retryAfter);
@@ -512,6 +573,9 @@ async function handleReview(req, res, params) {
 }
 
 // Proxies Letterboxd/TMDB images so the card can be exported as PNG without CORS taint.
+const PROXY_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+const MAX_PROXY_BYTES = 10 * 1024 * 1024;
+
 async function handleImage(req, res, params) {
   let u;
   try {
@@ -520,20 +584,32 @@ async function handleImage(req, res, params) {
     res.writeHead(400).end();
     return;
   }
-  if (!/(^|\.)ltrbxd\.com$/.test(u.hostname) && u.hostname !== "image.tmdb.org") {
+  const allowedHost = /(^|\.)ltrbxd\.com$/.test(u.hostname) || u.hostname === "image.tmdb.org";
+  if (u.protocol !== "https:" || u.port || u.username || !allowedHost) {
     res.writeHead(403).end();
     return;
   }
+  const retryAfter = imageLimiter(clientIp(req));
+  if (retryAfter) return tooMany(res, retryAfter);
+
   const upstream = await fetch(u, { headers: { "User-Agent": UA } }).catch(() => null);
-  if (!upstream || !upstream.ok) {
+  const type = (upstream?.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+  // Only raster images: never relay HTML, SVG or scripts from another host under our origin.
+  if (!upstream || !upstream.ok || !PROXY_TYPES.includes(type)) {
+    res.writeHead(502).end();
+    return;
+  }
+  const body = Buffer.from(await upstream.arrayBuffer());
+  if (body.length > MAX_PROXY_BYTES) {
     res.writeHead(502).end();
     return;
   }
   res.writeHead(200, {
-    "Content-Type": upstream.headers.get("content-type") || "image/jpeg",
+    "Content-Type": type,
     "Cache-Control": "public, max-age=86400",
+    "Content-Security-Policy": "default-src 'none'; sandbox",
   });
-  res.end(Buffer.from(await upstream.arrayBuffer()));
+  res.end(body);
 }
 
 // ---------- shareable card links ----------
@@ -561,7 +637,26 @@ async function readBody(req, limit) {
   return Buffer.concat(chunks);
 }
 
+// Cap total share-card storage so uploads can't fill the disk (default 1 GB).
+const MAX_CARDS_BYTES = Math.max(1, Number(process.env.MAX_CARDS_STORAGE_MB) || 1024) * 1024 * 1024;
+let cardsBytes = null; // computed lazily from disk, then kept up to date
+
+async function cardsStorageUsed() {
+  if (cardsBytes === null) {
+    cardsBytes = 0;
+    const files = await readdir(CARDS_DIR).catch(() => []);
+    for (const f of files) cardsBytes += (await stat(join(CARDS_DIR, f)).catch(() => ({ size: 0 }))).size;
+  }
+  return cardsBytes;
+}
+
 async function handleCreateCard(req, res) {
+  const retryAfter = cardLimiter(clientIp(req));
+  if (retryAfter) return tooMany(res, retryAfter);
+  if ((await cardsStorageUsed()) >= MAX_CARDS_BYTES) {
+    console.warn(`Share-card storage is full (${Math.round(cardsBytes / 1048576)} MB); rejecting uploads`);
+    return sendJson(res, 507, { code: "storage_full", error: "Share links are unavailable right now." });
+  }
   let payload;
   try {
     // base64 inflates by ~4/3, plus a little room for the metadata
@@ -569,21 +664,27 @@ async function handleCreateCard(req, res) {
   } catch (err) {
     return sendJson(res, 413, { error: err.message || "Invalid upload." });
   }
-  const image = Buffer.from(String(payload.image || "").replace(/^data:image\/jpeg;base64,/, ""), "base64");
+  if (!payload || typeof payload !== "object" || typeof payload.image !== "string") {
+    return sendJson(res, 400, { error: "Invalid upload." });
+  }
+  const image = Buffer.from(payload.image.replace(/^data:image\/jpeg;base64,/, ""), "base64");
   const isJpeg = image.length > 3 && image[0] === 0xff && image[1] === 0xd8 && image[2] === 0xff;
   if (!isJpeg || image.length > MAX_CARD_BYTES) return sendJson(res, 400, { error: "Invalid image." });
-  if (!isLetterboxdUrl(payload.reviewUrl)) return sendJson(res, 400, { error: "Invalid review link." });
+  const reviewUrl = canonicalLetterboxdUrl(payload.reviewUrl);
+  if (!reviewUrl) return sendJson(res, 400, { error: "Invalid review link." });
 
   const id = randomBytes(6).toString("base64url");
   const meta = {
     title: clip(payload.title, 200),
     description: clip(payload.description, 300),
-    reviewUrl: payload.reviewUrl,
+    reviewUrl,
     created: new Date().toISOString(),
   };
+  const metaJson = JSON.stringify(meta);
   await mkdir(CARDS_DIR, { recursive: true });
   await writeFile(join(CARDS_DIR, `${id}.jpg`), image);
-  await writeFile(join(CARDS_DIR, `${id}.json`), JSON.stringify(meta));
+  await writeFile(join(CARDS_DIR, `${id}.json`), metaJson);
+  cardsBytes += image.length + Buffer.byteLength(metaJson);
   res.logNote = `card=${id}`;
   sendJson(res, 201, { id, url: `${baseUrl(req)}/c/${id}` });
 }
@@ -600,10 +701,16 @@ async function handleCard(req, res, id, isImage) {
     const base = baseUrl(req);
     const page = `${base}/c/${id}`;
     const img = `${base}/c/${id}.jpg`;
-    const app = `${base}/?url=${encodeURIComponent(meta.reviewUrl)}`;
+    // Re-check stored links: cards saved by older versions may hold unsafe URLs.
+    const reviewUrl = canonicalLetterboxdUrl(meta.reviewUrl) || "https://letterboxd.com/";
+    const app = `${base}/?url=${encodeURIComponent(reviewUrl)}`;
     const detected = detectLang(req);
     const dict = await loadLocale(detected.lang);
     langHeaders(res, detected);
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'none'; img-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+    );
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end(`<!doctype html>
 <html lang="${detected.lang}"><head>
@@ -621,7 +728,7 @@ async function handleCard(req, res, id, isImage) {
 <link rel="stylesheet" href="/style.css" />
 </head><body class="card-page">
 <img class="shared-card" src="${escapeHtml(img)}" alt="${escapeHtml(meta.title)}" />
-<p class="card-links"><a href="${escapeHtml(meta.reviewUrl)}" rel="noopener">${escapeHtml(dict.read_full)}</a> · <a href="${escapeHtml(app)}">${escapeHtml(dict.make_own)}</a></p>
+<p class="card-links"><a href="${escapeHtml(reviewUrl)}" rel="noopener">${escapeHtml(dict.read_full)}</a> · <a href="${escapeHtml(app)}">${escapeHtml(dict.make_own)}</a></p>
 <p class="legal">${escapeHtml(dict.legal)}</p>
 </body></html>`);
   } catch {
@@ -652,12 +759,20 @@ async function route(req, res) {
   const { pathname, searchParams } = new URL(req.url, `http://${req.headers.host}`);
   if (pathname === "/api/review") return handleReview(req, res, searchParams);
   if (pathname === "/api/config") {
+    // Public by design (the footer needs it), but reveals nothing while the support area is hidden.
+    const sponsors = await loadSponsors();
+    if (!sponsors.visible) {
+      return sendJson(res, 200, {
+        support: { coffee: null, sponsor: null },
+        sponsors: { visible: false, contact: null, slots: sponsors.slots.map(() => null) },
+      });
+    }
     return sendJson(res, 200, {
       support: {
         coffee: BMC_USERNAME && `https://buymeacoffee.com/${BMC_USERNAME}`,
         sponsor: GITHUB_SPONSORS_USERNAME && `https://github.com/sponsors/${GITHUB_SPONSORS_USERNAME}`,
       },
-      sponsors: await loadSponsors(),
+      sponsors,
     });
   }
   if (pathname === "/img") return handleImage(req, res, searchParams);
@@ -672,10 +787,16 @@ const isLoggedPath = (p) => p === "/" || p.startsWith("/api/review") || p.starts
 
 const server = createServer(async (req, res) => {
   const started = Date.now();
+  // Baseline headers for every response; HTML pages add a full Content-Security-Policy.
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
   const path = (req.url || "/").split("?")[0];
   if (isLoggedPath(path)) {
     res.on("finish", () => {
-      const note = res.logNote ? ` ${res.logNote}` : "";
+      // Escape control characters so user input (like the review link) can't forge log lines.
+      const note = res.logNote ? ` ${res.logNote.replace(/[\x00-\x1f\x7f]/g, (c) => `\\x${c.charCodeAt(0).toString(16).padStart(2, "0")}`)}` : "";
       console.log(`${req.method} ${path} ${res.statusCode} ${Date.now() - started}ms${note}`);
     });
   }
