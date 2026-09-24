@@ -50,7 +50,5 @@
   "err_not_review": "Ce lien ne ressemble pas à une critique.",
   "err_fetch": "Impossible de récupérer cette critique. Vérifie le lien et réessaie.",
   "read_full": "Lire la critique complète ↗",
-  "make_own": "Crée ta propre carte",
-  "made_by": "Créé par",
-  "open_source": "Open source sur GitHub"
+  "make_own": "Crée ta propre carte"
 }

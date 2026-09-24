@@ -183,10 +183,12 @@ a.sponsor-slot.empty:hover strong { opacity: 1; }
 .langs a:hover { color: var(--text); }
 .langs a[aria-current] { color: var(--accent); font-weight: 600; }
 
-.made-by { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+.made-by { margin: 14px 0 0; font-size: 13px; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 5px; }
 .made-by a { color: var(--text); text-decoration: none; }
 .made-by a:hover { color: var(--accent); }
-.made-by span { margin: 0 6px; }
+.made-by .gh { display: inline-flex; margin-left: 8px; opacity: .7; transition: opacity .15s; }
+.made-by .gh:hover { opacity: 1; }
+.made-by .gh img { width: 16px; height: 16px; filter: invert(1); }
 
 /* shared card page (/c/:id) */
 .card-page { display: grid; place-items: center; align-content: center; gap: 16px; }

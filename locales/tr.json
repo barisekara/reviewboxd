@@ -50,7 +50,5 @@
   "err_not_review": "Bu bağlantı bir inceleme gibi görünmüyor.",
   "err_fetch": "İnceleme alınamadı. Bağlantıyı kontrol edip tekrar dene.",
   "read_full": "İncelemenin tamamını oku ↗",
-  "make_own": "Kendi kartını oluştur",
-  "made_by": "Geliştiren:",
-  "open_source": "GitHub'da açık kaynak"
+  "make_own": "Kendi kartını oluştur"
 }

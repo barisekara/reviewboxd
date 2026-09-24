@@ -50,7 +50,5 @@
   "err_not_review": "Questo link non sembra una recensione.",
   "err_fetch": "Impossibile recuperare la recensione. Controlla il link e riprova.",
   "read_full": "Leggi la recensione completa ↗",
-  "make_own": "Crea la tua card",
-  "made_by": "Creato da",
-  "open_source": "Open source su GitHub"
+  "make_own": "Crea la tua card"
 }

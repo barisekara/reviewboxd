@@ -50,7 +50,5 @@
   "err_not_review": "Ese enlace no parece una reseña.",
   "err_fetch": "No se pudo obtener esa reseña. Revisa el enlace e inténtalo de nuevo.",
   "read_full": "Leer la reseña completa ↗",
-  "make_own": "Crea tu propia tarjeta",
-  "made_by": "Hecho por",
-  "open_source": "Código abierto en GitHub"
+  "make_own": "Crea tu propia tarjeta"
 }
