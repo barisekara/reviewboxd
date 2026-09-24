@@ -227,7 +227,11 @@ async function scrapeReview(reviewUrl) {
 
   // og:image is the film backdrop when there is one (wide crop from the "sm/upload" bucket).
   const ogImage = meta(html, "og:image");
-  let backdrop = ogImage && ogImage.includes("/sm/upload/") ? ogImage : null;
+  // Ask for the 1920×1080 size: it gets stretched across the whole card.
+  let backdrop =
+    ogImage && ogImage.includes("/sm/upload/")
+      ? ogImage.replace(/-\d+-\d+-\d+-\d+-crop/, "-1920-1920-1080-1080-crop")
+      : null;
 
   let imageSource = "letterboxd";
   if (POSTER_SOURCE === "tmdb" && TMDB_API_KEY && film.sameAs) {
