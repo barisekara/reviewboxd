@@ -52,6 +52,11 @@ Edit `locales/<lang>.json` and the matching list in `taglines.json`.
    `COUNTRY_LANG`.
 4. Check the page with `?lang=<code>`, including a loaded review card.
 
+## Security issues
+
+Please don't report security problems in public issues. See [SECURITY.md](SECURITY.md) for how to
+report them privately.
+
 ## Reporting bugs
 
 Open an [issue](https://github.com/barisekara/reviewboxd/issues/new/choose) with the review link
