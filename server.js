@@ -56,7 +56,7 @@ async function loadSponsors() {
 // ---------- i18n ----------
 // Language order: ?lang= (remembered in a cookie) > cookie > Cloudflare country > Accept-Language > en.
 
-const LANGS = ["en", "fr", "es", "tr", "it", "de"];
+const LANGS = ["en", "fr", "es", "tr", "it", "de", "pt"];
 const LOCALES_DIR = join(ROOT, "locales");
 const COUNTRY_LANG = {
   fr: ["FR", "BE", "LU", "MC", "SN", "CI", "CM", "ML", "BF", "NE", "TG", "BJ", "GA", "CG", "CD", "MG", "GN", "HT", "RE", "GP", "MQ", "GF", "NC", "PF"],
@@ -64,6 +64,7 @@ const COUNTRY_LANG = {
   tr: ["TR"],
   it: ["IT", "SM", "VA"],
   de: ["DE", "AT", "LI"],
+  pt: ["BR", "PT", "AO", "MZ", "CV", "GW", "ST", "TL"],
 };
 const LANG_BY_COUNTRY = Object.fromEntries(
   Object.entries(COUNTRY_LANG).flatMap(([lang, countries]) => countries.map((c) => [c, lang]))

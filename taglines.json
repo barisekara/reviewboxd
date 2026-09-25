@@ -106,5 +106,23 @@
       "text": "Die Kritiker hatten ihren Auftritt. Jetzt sind wir anderen dran: die Essayisten, die Shitposter und alle dazwischen.",
       "short": "Die Kritiker hatten ihren Auftritt. Jetzt sind wir dran, Shitposter inklusive."
     }
+  ],
+  "pt": [
+    {
+      "text": "Sua review merece um pôster. Não importa se você escreve para a IndieWire ou só digitou “hi barbie” às 2 da manhã: se você disse, assuma.",
+      "short": "Sua review merece um pôster. IndieWire ou “hi barbie” às 2h: assuma."
+    },
+    {
+      "text": "Críticos ganham suas frases nos pôsteres de cinema. Você também merece. Toda review conta, do ensaio de mil palavras à frase curta que te deixa estranhamente feliz.",
+      "short": "Críticos vão parar nos pôsteres. Você também. Toda review conta."
+    },
+    {
+      "text": "Não precisa de credencial de imprensa. Obra-prima ou bagunça, a review é sua: coloque num pôster e tenha orgulho dela.",
+      "short": "Sem credencial de imprensa. Obra-prima ou bagunça, coloque num pôster."
+    },
+    {
+      "text": "Os críticos já tiveram a vez deles. Agora é a vez do resto de nós: os ensaístas, os shitposters e todo mundo no meio.",
+      "short": "Os críticos já tiveram a vez deles. Agora é a nossa, shitposters inclusos."
+    }
   ]
 }
