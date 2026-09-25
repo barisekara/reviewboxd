@@ -54,6 +54,19 @@ function starString(rating) {
 }
 
 // kind: "" (info), "error" (red, the user can fix it) or "outage" (calm box, Letterboxd's fault)
+// Same wording and plural rules as the server-rendered counter.
+function updateCounter(count) {
+  const el = $("counter");
+  if (!el || !count) return;
+  const lang = document.documentElement.lang || "en";
+  const category = new Intl.PluralRules(lang).select(count);
+  const [before, after = ""] = (I18N[`counter_${category}`] || I18N.counter_other || "{count}").split("{count}");
+  const number = document.createElement("strong");
+  number.textContent = new Intl.NumberFormat(lang).format(count);
+  el.replaceChildren(before, number, after);
+  el.hidden = false;
+}
+
 function setStatus(msg, kind = "") {
   if (kind === true) kind = "error";
   els.status.textContent = msg;
@@ -157,6 +170,7 @@ async function load(url) {
       throw err;
     }
     review = data;
+    updateCounter(data.posterCount);
     els.quoteInput.value = excerpt(data.body) || data.body;
     els.useBackdrop.checked = false;
     els.workspace.hidden = false;

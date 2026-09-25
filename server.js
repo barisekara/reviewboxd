@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -161,6 +161,11 @@ async function renderIndex(template, req, res) {
       return `<span class="tl-full">${escapeHtml(text)}</span><span class="tl-short">${escapeHtml(short)}</span>`;
     })())
     .replace("{{LANG_SWITCHER}}", switcher)
+    .replace("{{COUNTER}}", (() => {
+      if (!posterCount) return `<p id="counter" class="counter" hidden></p>`;
+      const { before, number, after } = counterParts(dict, lang, posterCount);
+      return `<p id="counter" class="counter">${escapeHtml(before)}<strong>${number}</strong>${escapeHtml(after)}</p>`;
+    })())
     .replace("{{I18N}}", JSON.stringify(dict).replace(/</g, "\\u003c"))
     .replace(/\{\{t\.(\w+)(?::([^}]+))?\}\}/g, (_, key, arg) => escapeHtml(fill(dict[key] ?? key, { name: arg })));
 }
@@ -481,6 +486,42 @@ async function tmdbImages(filmUrl) {
   return { poster: img("w780", data.poster_path), backdrop: img("w1280", data.backdrop_path) };
 }
 
+// ---------- poster counter ----------
+// One global number, no per-visitor data. Kept in memory and saved to data/stats.json every few
+// seconds (and on shutdown), so it survives restarts through the Docker volume.
+
+const STATS_FILE = join(ROOT, "data", "stats.json");
+let posterCount = 0;
+let statsDirty = false;
+try {
+  posterCount = Number(JSON.parse(await readFile(STATS_FILE, "utf8")).posters) || 0;
+} catch (err) {
+  if (err.code !== "ENOENT") console.warn(`stats.json is invalid, starting the counter at 0: ${err.message}`);
+}
+
+async function saveStats() {
+  if (!statsDirty) return;
+  statsDirty = false;
+  try {
+    await mkdir(join(ROOT, "data"), { recursive: true });
+    // Write then rename, so a crash mid-write can't leave a half-written file.
+    await writeFile(`${STATS_FILE}.tmp`, JSON.stringify({ posters: posterCount }));
+    await rename(`${STATS_FILE}.tmp`, STATS_FILE);
+  } catch (err) {
+    statsDirty = true;
+    console.warn(`Could not save stats.json: ${err.message}`);
+  }
+}
+setInterval(saveStats, 10_000).unref();
+
+// "1,234 posters generated so far", with the number in <strong>; plural rules per language.
+function counterParts(dict, lang, count) {
+  const category = new Intl.PluralRules(lang).select(count);
+  const template = dict[`counter_${category}`] || dict.counter_other || "{count}";
+  const [before, after = ""] = template.split("{count}");
+  return { before, number: new Intl.NumberFormat(lang).format(count), after };
+}
+
 // ---------- rate limiting ----------
 // Each review lookup hits Letterboxd, so limit it per visitor: RATE_LIMIT_PER_MINUTE requests in
 // any 60-second window. IPs live only in this in-memory map for a minute; they're never logged.
@@ -563,7 +604,10 @@ async function handleReview(req, res, params) {
     return sendJson(res, 429, { code: "rate_limited", error: "Too many lookups, try again shortly." });
   }
   try {
-    sendJson(res, 200, await scrapeReview(target));
+    const review = await scrapeReview(target);
+    posterCount++;
+    statsDirty = true;
+    sendJson(res, 200, { ...review, posterCount });
   } catch (err) {
     const code = err.code || "fetch";
     res.logNote += ` code=${code}`;
@@ -811,7 +855,10 @@ const server = createServer(async (req, res) => {
 
 // Docker sends SIGTERM on stop; close cleanly instead of waiting to be killed.
 for (const signal of ["SIGTERM", "SIGINT"]) {
-  process.on(signal, () => server.close(() => process.exit(0)));
+  process.on(signal, () => server.close(async () => {
+    await saveStats();
+    process.exit(0);
+  }));
 }
 
 server.listen(PORT, () => {

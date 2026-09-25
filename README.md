@@ -136,6 +136,8 @@ reviewboxd is a just-for-fun project and collects nothing about its visitors:
 - **Share links store a card.** If you use the X / Bluesky / Facebook / … buttons, the card
   image, quote, film title, review link and creation date are saved on the server so the link can show a
   preview. Nothing else is attached (no IP address, no identifier).
+- **One global counter.** The "posters generated so far" number is a single total saved in
+  `data/stats.json`. It isn't tied to anyone.
 - **Logs contain no IP addresses.** The server logs each page view and review lookup
   (time, path, status, duration, and for lookups the review link) plus errors, but never who
   made the request.

@@ -65,6 +65,10 @@ button, input, textarea { font: inherit; color: inherit; }
 .search button:active, .primary:active { transform: scale(.98); }
 .search button:disabled { opacity: .6; cursor: progress; }
 
+.counter { text-align: center; margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.counter strong { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.counter[hidden] { display: none; }
+
 .status { text-align: center; color: var(--muted); min-height: 1.5em; margin: 12px auto; max-width: 620px; text-wrap: pretty; }
 .status.error { color: #ff6b6b; }
 .status.outage {

@@ -57,5 +57,7 @@
   "legal": "Proyecto de fans independiente, sin vínculo con Letterboxd.",
   "err_rate_limited": "No queremos llevarnos mal con Letterboxd. Vuelve a intentarlo en un momento para un nuevo póster.",
   "err_too_old": "Es la reseña de un nuevo visionado, y para esas Letterboxd solo nos deja leer las 50 entradas más recientes del diario. Esta es más antigua, ¡lo sentimos! Su primera reseña de la película funciona siempre.",
-  "err_storage_full": "Los enlaces para compartir están de descanso ahora mismo. Descarga el PNG y compártelo."
+  "err_storage_full": "Los enlaces para compartir están de descanso ahora mismo. Descarga el PNG y compártelo.",
+  "counter_one": "{count} póster creado hasta ahora",
+  "counter_other": "{count} pósteres creados hasta ahora"
 }

@@ -57,5 +57,7 @@
   "legal": "Unabhängiges Fanprojekt, nicht mit Letterboxd verbunden.",
   "err_rate_limited": "Wir wollen es uns mit Letterboxd nicht verscherzen. Versuch es gleich noch mal für ein neues Poster.",
   "err_too_old": "Das ist die Rezension einer erneuten Sichtung, und dafür lässt uns Letterboxd nur die 50 neuesten Tagebucheinträge lesen. Diese ist älter, sorry! Die erste Rezension zum Film funktioniert immer.",
-  "err_storage_full": "Geteilte Links machen gerade Pause. Lade das PNG herunter und teile es stattdessen."
+  "err_storage_full": "Geteilte Links machen gerade Pause. Lade das PNG herunter und teile es stattdessen.",
+  "counter_one": "Bisher {count} Poster erstellt",
+  "counter_other": "Bisher {count} Poster erstellt"
 }
