@@ -59,5 +59,10 @@
   "err_too_old": "È la recensione di una nuova visione, e per queste Letterboxd ci lascia leggere solo le 50 voci più recenti del diario. Questa è più vecchia, scusa! La sua prima recensione del film funziona sempre.",
   "err_storage_full": "I link di condivisione sono in pausa al momento. Scarica il PNG e condividi quello.",
   "counter_one": "{count} locandina creata finora",
-  "counter_other": "{count} locandine create finora"
+  "counter_other": "{count} locandine create finora",
+  "style": "Stile",
+  "style_classic": "Classico",
+  "style_blockbuster": "Blockbuster",
+  "style_festival": "Festival",
+  "style_handwritten": "A mano"
 }

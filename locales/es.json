@@ -59,5 +59,10 @@
   "err_too_old": "Es la reseña de un nuevo visionado, y para esas Letterboxd solo nos deja leer las 50 entradas más recientes del diario. Esta es más antigua, ¡lo sentimos! Su primera reseña de la película funciona siempre.",
   "err_storage_full": "Los enlaces para compartir están de descanso ahora mismo. Descarga el PNG y compártelo.",
   "counter_one": "{count} póster creado hasta ahora",
-  "counter_other": "{count} pósteres creados hasta ahora"
+  "counter_other": "{count} pósteres creados hasta ahora",
+  "style": "Estilo",
+  "style_classic": "Clásico",
+  "style_blockbuster": "Taquillero",
+  "style_festival": "Festival",
+  "style_handwritten": "A mano"
 }

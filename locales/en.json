@@ -59,5 +59,10 @@
   "err_too_old": "This is a repeat review of the film, and for those Letterboxd only lets us read a reviewer's 50 most recent diary entries. This one is older, sorry! Their first review of the film works any time.",
   "err_storage_full": "Share links are taking a break right now. Download the PNG and share that instead.",
   "counter_one": "{count} poster generated so far",
-  "counter_other": "{count} posters generated so far"
+  "counter_other": "{count} posters generated so far",
+  "style": "Style",
+  "style_classic": "Classic",
+  "style_blockbuster": "Blockbuster",
+  "style_festival": "Festival",
+  "style_handwritten": "Handwritten"
 }

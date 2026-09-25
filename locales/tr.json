@@ -59,5 +59,10 @@
   "err_too_old": "Bu, filmin tekrar izlenmesine ait bir inceleme; Letterboxd bunlar için yalnızca son 50 günlük kaydını okumamıza izin veriyor. Bu daha eski, kusura bakma! Filme yazdığı ilk inceleme her zaman çalışır.",
   "err_storage_full": "Paylaşım bağlantıları şu an mola veriyor. PNG'yi indirip onu paylaş.",
   "counter_one": "Şimdiye kadar {count} afiş oluşturuldu",
-  "counter_other": "Şimdiye kadar {count} afiş oluşturuldu"
+  "counter_other": "Şimdiye kadar {count} afiş oluşturuldu",
+  "style": "Stil",
+  "style_classic": "Klasik",
+  "style_blockbuster": "Gişe",
+  "style_festival": "Festival",
+  "style_handwritten": "El yazısı"
 }

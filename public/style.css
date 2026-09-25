@@ -291,6 +291,48 @@ a.sponsor-slot.empty:hover strong { opacity: 1; }
 
 .card.no-stars .stars, .card.no-film .film { display: none; }
 
+/* ---------- quote styles (data-style on the card) ---------- */
+
+/* Blockbuster: tall condensed capitals, like an action-movie poster */
+.card[data-style="blockbuster"] .quote {
+  font-family: Anton, Impact, sans-serif; font-style: normal; font-weight: 400;
+  text-transform: uppercase; line-height: 1.02; letter-spacing: .01em;
+}
+.card[data-style="blockbuster"] .stars { font-size: 72px; }
+.card[data-style="blockbuster"] .author { text-transform: uppercase; letter-spacing: .08em; }
+.card[data-style="blockbuster"] .film-title { font-family: Anton, Impact, sans-serif; font-weight: 400; letter-spacing: .03em; }
+
+/* Handwritten: marker scribbled onto the poster */
+.card[data-style="handwritten"] .quote {
+  font-family: "Permanent Marker", "Comic Sans MS", cursive; font-style: normal; font-weight: 400;
+  line-height: 1.18; letter-spacing: 0; transform: rotate(-2.5deg);
+}
+.card[data-style="handwritten"] .quote-box { padding: 8px 0; }
+.card[data-style="handwritten"] .author { font-family: "Permanent Marker", cursive; font-weight: 400; letter-spacing: .01em; }
+
+/* Festival: stars and reviewer inside laurels, quote below in upright serif */
+.laurels { display: none; }
+.card[data-style="festival"] .laurels {
+  display: flex; align-items: center; justify-content: center; gap: 20px; color: #e8c874;
+}
+.card[data-style="festival"] .stars, .card[data-style="festival"] .byline { display: none; }
+.card[data-style="festival"] .quote { font-style: normal; font-weight: 500; }
+.laurel { width: 108px; height: 302px; flex: none; fill: currentColor; }
+.laurel.right { transform: scaleX(-1); }
+.laurel-text { display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 560px; }
+.laurel-stars { font-size: 58px; letter-spacing: 6px; line-height: 1; color: var(--gold); }
+.laurel-stars .half { font-size: .8em; vertical-align: 2px; letter-spacing: 0; }
+.laurel-name {
+  font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: 48px; line-height: 1.1;
+  text-transform: uppercase; letter-spacing: .06em; color: #f3e3b0; overflow-wrap: anywhere; text-align: center;
+}
+.laurel-via { font-size: 20px; letter-spacing: .32em; text-transform: uppercase; color: #e8c874; }
+.card.no-stars .laurel-stars { display: none; }
+.card[data-format="wide"][data-style="festival"] .laurels { justify-content: flex-start; }
+.card[data-format="wide"] .laurel { width: 76px; height: 212px; }
+.card[data-format="wide"] .laurel-stars { font-size: 44px; }
+.card[data-format="wide"] .laurel-name { font-size: 36px; }
+
 /* wide: blurred background, poster on the left, text on the right */
 .card[data-format="wide"] .card-bg img { filter: blur(28px) brightness(.45) saturate(1.2); transform: scale(1.15); }
 .card[data-format="wide"].backdrop .card-bg img { filter: brightness(.5); transform: none; }

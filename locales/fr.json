@@ -59,5 +59,10 @@
   "err_too_old": "C'est une critique d'un revisionnage, et pour celles-ci Letterboxd ne nous laisse lire que les 50 dernières entrées du journal. Celle-ci est plus ancienne, désolé ! Sa première critique du film fonctionne toujours.",
   "err_storage_full": "Les liens de partage font une pause pour le moment. Télécharge le PNG et partage-le à la place.",
   "counter_one": "{count} affiche créée jusqu'ici",
-  "counter_other": "{count} affiches créées jusqu'ici"
+  "counter_other": "{count} affiches créées jusqu'ici",
+  "style": "Style",
+  "style_classic": "Classique",
+  "style_blockbuster": "Blockbuster",
+  "style_festival": "Festival",
+  "style_handwritten": "Manuscrit"
 }

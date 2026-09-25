@@ -1,7 +1,8 @@
 # reviewboxd
 
 Paste a Letterboxd review link and get a movie-poster style testimonial card:
-the film poster, the star rating, a pull quote from the review, and the reviewer.
+the film poster, the star rating, a pull quote from the review, and the reviewer. Three formats
+(poster, story, wide) and four quote styles (Classic, Blockbuster, Festival, Handwritten).
 
 No press pass required. Whether your review is a masterpiece or a mess, it's yours: put it on
 a poster and be proud of it.

@@ -38,6 +38,19 @@ Open http://localhost:3000 and paste any Letterboxd review link.
   visual.
 - **One change per pull request.** Small PRs get reviewed faster.
 
+## Adding a quote style
+
+Quote styles (Classic, Blockbuster, Festival, Handwritten) are mostly CSS, which makes a new one a
+good first contribution:
+
+1. Add a button to the `#styles` picker in `public/index.html`, with a `style_<name>` label in
+   every `locales/*.json`.
+2. Add `.card[data-style="<name>"]` rules in `public/style.css`, next to the other styles.
+3. Add the name to the allowed list at the bottom of `public/app.js`. If it uses a new Google Font,
+   add the font to the stylesheet link in `index.html` and to `STYLE_FONTS` in `app.js`.
+4. Check all three formats with a short and a long quote, and download a PNG of each. Fonts and
+   graphics must also appear in the exported image.
+
 ## Translations
 
 Fixes to existing translations are very welcome, especially from native speakers.

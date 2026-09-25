@@ -11,7 +11,8 @@ const els = {
   bgImg: $("bgImg"), posterImg: $("posterImg"), stars: $("stars"),
   quoteBox: $("quoteBox"), quote: $("quote"), avatar: $("avatar"), author: $("author"),
   filmTitle: $("filmTitle"), filmMeta: $("filmMeta"),
-  quoteInput: $("quoteInput"), fullReview: $("fullReview"), formats: $("formats"),
+  quoteInput: $("quoteInput"), fullReview: $("fullReview"), formats: $("formats"), styles: $("styles"),
+  laurelStars: $("laurelStars"), laurelName: $("laurelName"),
   showStars: $("showStars"), showFilm: $("showFilm"), useBackdrop: $("useBackdrop"),
   download: $("download"), share: $("share"), shareHint: $("shareHint"), sourceLink: $("sourceLink"),
   socials: $("socials"), tmdbCredit: $("tmdbCredit"),
@@ -88,7 +89,9 @@ function scaleCard() {
 function fitQuote(card) {
   const box = card.querySelector(".quote-box");
   const quote = card.querySelector(".quote");
-  let max = card.dataset.format === "wide" ? 96 : 120;
+  // Condensed fonts can go bigger before filling the box.
+  const wide = card.dataset.format === "wide";
+  let max = card.dataset.style === "blockbuster" ? (wide ? 130 : 170) : wide ? 110 : 140;
   let min = 26;
   // quote-box uses max-height, so let it grow to its limit before measuring
   box.style.height = getComputedStyle(box).maxHeight;
@@ -123,10 +126,12 @@ function render() {
   renderBackground();
   els.posterImg.src = proxied(film.poster);
   els.stars.innerHTML = starString(rating);
+  els.laurelStars.innerHTML = starString(rating);
   els.card.classList.toggle("no-stars", !els.showStars.checked || rating == null);
   els.card.classList.toggle("no-film", !els.showFilm.checked);
 
   els.author.textContent = `— ${author.displayName || author.username}`;
+  els.laurelName.textContent = author.displayName || author.username;
   els.avatar.hidden = !author.avatar;
   if (author.avatar) els.avatar.src = proxied(author.avatar);
 
@@ -174,10 +179,10 @@ async function load(url) {
     els.quoteInput.value = excerpt(data.body) || data.body;
     els.useBackdrop.checked = false;
     els.workspace.hidden = false;
-    await document.fonts.ready;
+    await styleFontReady();
     render();
     setStatus("");
-    history.replaceState(null, "", `?url=${encodeURIComponent(url)}&format=${els.card.dataset.format}`);
+    syncUrl(url);
   } catch (err) {
     setStatus(err.message, err.outage ? "outage" : "error");
   } finally {
@@ -208,8 +213,31 @@ els.formats.addEventListener("click", (e) => {
   if (!review) return;
   scaleCard();
   renderQuote();
-  history.replaceState(null, "", `?url=${encodeURIComponent(review.url)}&format=${btn.dataset.format}`);
+  syncUrl();
 });
+
+els.styles.addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  for (const b of els.styles.children) b.classList.toggle("active", b === btn);
+  els.card.dataset.style = btn.dataset.style;
+  if (!review) return;
+  styleFontReady().then(renderQuote);
+  syncUrl();
+});
+
+// Browsers only fetch a font once something uses it; load the style's font before measuring the quote.
+const STYLE_FONTS = { blockbuster: '64px "Anton"', handwritten: '64px "Permanent Marker"' };
+function styleFontReady() {
+  const font = STYLE_FONTS[els.card.dataset.style];
+  return (font ? document.fonts.load(font) : Promise.resolve()).catch(() => {}).then(() => document.fonts.ready);
+}
+
+// Keep the address shareable: ?url=…&format=…&style=…
+function syncUrl(url = review.url) {
+  const q = new URLSearchParams({ url, format: els.card.dataset.format, style: els.card.dataset.style });
+  history.replaceState(null, "", `?${q}`);
+}
 
 for (const el of [els.showStars, els.showFilm]) {
   el.addEventListener("change", () => {
@@ -473,6 +501,10 @@ const initial = params.get("url");
 const requested = params.get("format");
 const startFormat = ["poster", "story", "wide"].includes(requested) ? requested : canShareFiles ? "story" : null;
 els.formats.querySelector(`[data-format="${startFormat}"]`)?.click();
+const requestedStyle = params.get("style");
+if (["classic", "blockbuster", "festival", "handwritten"].includes(requestedStyle)) {
+  els.styles.querySelector(`[data-style="${requestedStyle}"]`).click();
+}
 if (initial) {
   els.url.value = initial;
   load(initial);
