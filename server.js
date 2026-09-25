@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { mkdir, readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -770,7 +770,7 @@ async function handleCard(req, res, id, isImage) {
 <meta property="og:image:width" content="1600" /><meta property="og:image:height" content="900" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="${escapeHtml(img)}" />
-<link rel="stylesheet" href="/style.css" />
+<link rel="stylesheet" href="${await assetUrl("style.css")}" />
 </head><body class="card-page">
 <img class="shared-card" src="${escapeHtml(img)}" alt="${escapeHtml(meta.title)}" />
 <p class="card-links"><a href="${escapeHtml(reviewUrl)}" rel="noopener">${escapeHtml(dict.read_full)}</a> · <a href="${escapeHtml(app)}">${escapeHtml(dict.make_own)}</a></p>
@@ -779,6 +779,27 @@ async function handleCard(req, res, id, isImage) {
   } catch {
     res.writeHead(404).end("Not found");
   }
+}
+
+// "style.css" -> "/style.css?v=<content hash>". A changed file gets a new URL, so Cloudflare and
+// browsers can cache assets for a year and still pick up every deploy immediately.
+const assetHashes = new Map(); // file -> { mtimeMs, hash }
+async function assetUrl(name) {
+  const file = join(PUBLIC_DIR, name);
+  const { mtimeMs } = await stat(file);
+  let entry = assetHashes.get(file);
+  if (!entry || entry.mtimeMs !== mtimeMs) {
+    entry = { mtimeMs, hash: createHash("sha1").update(await readFile(file)).digest("hex").slice(0, 10) };
+    assetHashes.set(file, entry);
+  }
+  return `/${name}?v=${entry.hash}`;
+}
+
+async function fillAssets(html) {
+  for (const [placeholder, name] of html.matchAll(/\{\{ASSET:([\w.-]+)\}\}/g)) {
+    html = html.replace(placeholder, await assetUrl(name));
+  }
+  return html;
 }
 
 async function serveStatic(req, res, pathname) {
@@ -790,10 +811,14 @@ async function serveStatic(req, res, pathname) {
   }
   try {
     let data = await readFile(file);
-    if (file === join(PUBLIC_DIR, "index.html")) {
-      data = await renderIndex(data.toString(), req, res);
-    }
-    res.writeHead(200, { "Content-Type": MIME[extname(file)] || "application/octet-stream" });
+    const isIndex = file === join(PUBLIC_DIR, "index.html");
+    if (isIndex) data = await fillAssets(await renderIndex(data.toString(), req, res));
+    // Versioned asset URLs never change content, so cache them for good; anything else revalidates.
+    const versioned = new URL(req.url, "http://x").searchParams.has("v");
+    res.writeHead(200, {
+      "Content-Type": MIME[extname(file)] || "application/octet-stream",
+      ...(isIndex ? {} : { "Cache-Control": versioned ? "public, max-age=31536000, immutable" : "no-cache" }),
+    });
     res.end(data);
   } catch {
     res.writeHead(404).end("Not found");
