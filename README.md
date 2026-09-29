@@ -13,6 +13,16 @@ Made by [Barış](https://baris.wtf) · Contributions welcome, see [CONTRIBUTING
 
 <a href="https://buymeacoffee.com/barisekara"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="40"></a>
 
+## iPhone shortcut
+
+Make a card straight from the Letterboxd app:
+[add the Reviewboxd shortcut](https://www.icloud.com/shortcuts/a1eb2a81b7434a8ba7e5f0e8746fbf9b),
+then open any review in Letterboxd and tap **Share → Reviewboxd**. It also works with a copied
+review link when you run it from the home screen.
+
+If Reviewboxd doesn't show up in the share sheet, scroll to the end and tap **Edit Actions** to
+turn it on.
+
 ## Run
 
 ```sh
