@@ -492,6 +492,10 @@ function renderSponsorSlots({ contact, slots }) {
   );
 }
 
+// ---------- iPhone shortcut hint (iOS only; iPadOS reports itself as a Mac with touch) ----------
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (isIOS && $("iosShortcut")) $("iosShortcut").hidden = false;
+
 // ---------- language switcher ----------
 // Keep the current review/format when switching language; the server remembers the choice.
 for (const a of $("langs").querySelectorAll("a")) {

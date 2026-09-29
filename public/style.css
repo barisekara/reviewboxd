@@ -69,6 +69,16 @@ button, input, textarea { font: inherit; color: inherit; }
 .counter strong { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
 .counter[hidden] { display: none; }
 
+.ios-shortcut {
+  display: table; margin: 10px auto 0; padding: 7px 14px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: 13px; color: var(--muted); text-decoration: none; text-align: center;
+}
+.ios-shortcut strong { color: var(--accent); font-weight: 600; }
+.ios-shortcut:hover { border-color: var(--accent); }
+.ios-shortcut[hidden] { display: none; }
+@media (max-width: 600px) { .ios-shortcut strong { display: block; margin-top: 2px; } }
+
 .status { text-align: center; color: var(--muted); min-height: 1.5em; margin: 12px auto; max-width: 620px; text-wrap: pretty; }
 .status.error { color: #ff6b6b; }
 .status.outage {

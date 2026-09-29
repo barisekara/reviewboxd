@@ -48,6 +48,7 @@ Copy `.env.example` to `.env` (it's loaded automatically) or set real environmen
 | `CARD_RATE_LIMIT_PER_MINUTE` | `5` | Share-link uploads per visitor IP per minute |
 | `IMAGE_RATE_LIMIT_PER_MINUTE` | `120` | Proxied poster/avatar images per visitor IP per minute |
 | `MAX_CARDS_STORAGE_MB` | `1024` | Total disk space for share cards; uploads pause when full |
+| `IOS_SHORTCUT_URL` | the Reviewboxd shortcut | iCloud link shown to iPhone/iPad visitors; `off` hides it |
 | `PORT` | `3000` | |
 
 With `tmdb`, the TMDB id is read from the Letterboxd film page (no title guessing). If the

@@ -64,5 +64,7 @@
   "style_classic": "Clásico",
   "style_blockbuster": "Taquillero",
   "style_festival": "Festival",
-  "style_handwritten": "A mano"
+  "style_handwritten": "A mano",
+  "shortcut_intro": "¿Usas la app de Letterboxd?",
+  "shortcut_link": "Añade el atajo de iPhone"
 }

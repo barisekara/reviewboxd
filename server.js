@@ -25,6 +25,12 @@ const supportUser = (name) => {
   if (v && !USERNAME_RE.test(v)) console.warn(`${name} has invalid characters; ignoring it.`);
   return USERNAME_RE.test(v) ? v : null;
 };
+// iPhone shortcut that sends Letterboxd shares here; shown to iOS visitors only. Set
+// IOS_SHORTCUT_URL to your own iCloud link, or to "off" to hide it (e.g. on a self-hosted copy).
+const IOS_SHORTCUT_URL = (() => {
+  const v = process.env.IOS_SHORTCUT_URL ?? "https://www.icloud.com/shortcuts/a1eb2a81b7434a8ba7e5f0e8746fbf9b";
+  return /^https:\/\/www\.icloud\.com\/shortcuts\/[0-9a-f]+$/.test(v) ? v : null;
+})();
 const BMC_USERNAME = supportUser("BMC_USERNAME");
 const GITHUB_SPONSORS_USERNAME = supportUser("GITHUB_SPONSORS_USERNAME");
 // Company sponsor slots, read from sponsors.json on each request so edits need no restart.
@@ -162,6 +168,13 @@ async function renderIndex(template, req, res) {
       return `<span class="tl-full">${escapeHtml(text)}</span><span class="tl-short">${escapeHtml(short)}</span>`;
     })())
     .replace("{{LANG_SWITCHER}}", switcher)
+    .replace(
+      "{{SHORTCUT}}",
+      IOS_SHORTCUT_URL
+        ? `<a id="iosShortcut" class="ios-shortcut" href="${IOS_SHORTCUT_URL}" target="_blank" rel="noopener" hidden>` +
+            `<span aria-hidden="true">📲</span> ${escapeHtml(dict.shortcut_intro)} <strong>${escapeHtml(dict.shortcut_link)}</strong></a>`
+        : ""
+    )
     .replace("{{COUNTER}}", (() => {
       if (!posterCount) return `<p id="counter" class="counter" hidden></p>`;
       const { before, number, after } = counterParts(dict, lang, posterCount);

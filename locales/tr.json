@@ -64,5 +64,7 @@
   "style_classic": "Klasik",
   "style_blockbuster": "Gişe",
   "style_festival": "Festival",
-  "style_handwritten": "El yazısı"
+  "style_handwritten": "El yazısı",
+  "shortcut_intro": "Letterboxd uygulamasını mı kullanıyorsun?",
+  "shortcut_link": "iPhone kestirmesini ekle"
 }
