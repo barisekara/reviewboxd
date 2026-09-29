@@ -163,7 +163,15 @@ function render() {
 
 // ---------- events ----------
 
-async function load(url) {
+// Shared text often wraps the link ("Check out this review https://boxd.it/…"): pick the link out.
+function extractLink(text) {
+  const m = String(text).match(/https?:\/\/(?:www\.)?(?:letterboxd\.com|boxd\.it)\/[^\s"'<>]+/i);
+  return m ? m[0] : String(text).trim();
+}
+
+async function load(input) {
+  const url = extractLink(input);
+  if (els.url.value !== url) els.url.value = url;
   setStatus(t("fetching"));
   els.go.disabled = true;
   try {
