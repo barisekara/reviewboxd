@@ -26,11 +26,35 @@
     <p class="tagline">{{TAGLINE}}</p>
   </header>
 
-  <form id="form" class="search" autocomplete="off">
-    <input id="url" type="url" required
-      placeholder="{{t.url_placeholder}}" aria-label="{{t.url_label}}" />
-    <button type="submit" id="go">{{t.create}}</button>
+  <!-- Film slugs don't always match titles (Primetime is /primetime-2026/), so ask for a username and
+       let people pick from their reviews. A pasted review link (or boxd.it one) still goes straight in. -->
+  <form id="form" class="search" autocomplete="off" aria-label="{{t.url_label}}">
+    <label class="search-field">
+      <span class="at" aria-hidden="true">@</span>
+      <input id="user" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="search"
+        placeholder="{{t.user_placeholder}}" aria-label="{{t.user_label}}" />
+    </label>
+    <button type="submit" id="go" aria-label="{{t.find_reviews}}">
+      <span class="go-label">{{t.find_reviews}}</span>
+      <svg class="go-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
   </form>
+
+  <section id="picker" class="picker" hidden aria-labelledby="pickerName">
+    <header class="picker-head">
+      <div class="picker-who">
+        <span class="label">{{t.reviews_by}}</span>
+        <h2 id="pickerName" class="picker-name" lang="en"></h2>
+      </div>
+      <input id="pickerSearch" class="picker-search" type="search" autocomplete="off"
+        placeholder="{{t.search_reviews}}" aria-label="{{t.search_reviews}}" />
+      <button type="button" id="pickerReopen" class="picker-reopen" hidden>{{t.choose_another}}</button>
+    </header>
+    <ol id="pickerList" class="picker-list" aria-live="polite"></ol>
+    <p id="pickerEmpty" class="picker-empty" hidden></p>
+    <button type="button" id="pickerMore" class="picker-more" hidden></button>
+  </section>
+  <p class="search-hint">{{t.paste_hint}}</p>
   {{COUNTER}}
   {{SHORTCUT}}
   <p id="status" class="status" role="status"></p>

@@ -237,6 +237,7 @@ server$ docker compose logs reviewboxd | grep code=         # only failed or lim
 ```
 
 **Rate limits.** Per visitor IP and minute: `RATE_LIMIT_PER_MINUTE` review lookups (default 5),
+`LIST_RATE_LIMIT_PER_MINUTE` review-list pages for the username search (10),
 `CARD_RATE_LIMIT_PER_MINUTE` share-link uploads (5) and `IMAGE_RATE_LIMIT_PER_MINUTE` proxied
 images (120). Share cards stop being accepted once they use `MAX_CARDS_STORAGE_MB` (1024).
 Change them in `.env`, then run `docker compose up -d`.

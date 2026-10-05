@@ -1,8 +1,9 @@
 # reviewboxd
 
-Paste a Letterboxd review link and get a movie-poster style testimonial card:
-the film poster, the star rating, a pull quote from the review, and the reviewer. Three formats
-(poster, story, wide) and four quote styles (Classic, Blockbuster, Festival, Handwritten).
+Enter your Letterboxd username, pick one of your reviews (or paste a review link), and get a
+movie-poster style testimonial card: the film poster, the star rating, a pull quote from the
+review, and the reviewer. Three formats (poster, story, wide) and four quote styles (Classic,
+Blockbuster, Festival, Handwritten).
 
 No press pass required. Whether your review is a masterpiece or a mess, it's yours: put it on
 a poster and be proud of it.
@@ -45,6 +46,7 @@ Copy `.env.example` to `.env` (it's loaded automatically) or set real environmen
 | `BMC_USERNAME` | none | Shows a "Buy me a coffee" tile linking to buymeacoffee.com/&lt;name&gt; |
 | `GITHUB_SPONSORS_USERNAME` | none | Shows a "Become a sponsor" tile linking to github.com/sponsors/&lt;name&gt; |
 | `RATE_LIMIT_PER_MINUTE` | `5` | Review lookups allowed per visitor IP per minute |
+| `LIST_RATE_LIMIT_PER_MINUTE` | `10` | Review-list pages (the username search) per visitor IP per minute |
 | `CARD_RATE_LIMIT_PER_MINUTE` | `5` | Share-link uploads per visitor IP per minute |
 | `IMAGE_RATE_LIMIT_PER_MINUTE` | `120` | Proxied poster/avatar images per visitor IP per minute |
 | `MAX_CARDS_STORAGE_MB` | `1024` | Total disk space for share cards; uploads pause when full |
@@ -62,6 +64,9 @@ required attribution when TMDB images are used.
   directly (CORS). It reads the page's JSON-LD and meta tags (text, rating, film, poster,
   director, reviewer, avatar). It also proxies images through `/img` so the card can be
   exported as a PNG.
+- Film slugs don't always match titles (Primetime is `/film/primetime-2026/`), so instead of
+  asking for a link the page asks for a username and lists that member's reviews from
+  `/<user>/reviews/` (12 per page, plus one small poster request per film, cached in memory).
 - Repeat reviews of the same film (`/<user>/film/<slug>/1/`) sit behind a Letterboxd bot
   challenge, which reviewboxd doesn't try to bypass. It reads those from the reviewer's public
   RSS feed instead, which only covers their 50 most recent diary entries.

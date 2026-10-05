@@ -6,7 +6,7 @@ const t = (key, vars = {}) =>
   String(I18N[key] ?? key).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
 
 const els = {
-  form: $("form"), url: $("url"), go: $("go"), status: $("status"),
+  form: $("form"), user: $("user"), go: $("go"), status: $("status"),
   workspace: $("workspace"), stage: $("stage"), card: $("card"),
   bgImg: $("bgImg"), posterImg: $("posterImg"), stars: $("stars"),
   quoteBox: $("quoteBox"), quote: $("quote"), avatar: $("avatar"), author: $("author"),
@@ -16,6 +16,8 @@ const els = {
   showStars: $("showStars"), showFilm: $("showFilm"), useBackdrop: $("useBackdrop"),
   download: $("download"), share: $("share"), shareHint: $("shareHint"), sourceLink: $("sourceLink"),
   socials: $("socials"), tmdbCredit: $("tmdbCredit"),
+  picker: $("picker"), pickerName: $("pickerName"), pickerSearch: $("pickerSearch"), pickerList: $("pickerList"),
+  pickerEmpty: $("pickerEmpty"), pickerMore: $("pickerMore"), pickerReopen: $("pickerReopen"),
 };
 
 // Phones that can share image files (iOS Safari, Android Chrome) get a "Share image…" button.
@@ -169,9 +171,12 @@ function extractLink(text) {
   return m ? m[0] : String(text).trim();
 }
 
+const hasLink = (s) => /(letterboxd\.com|boxd\.it)\//i.test(s);
+// letterboxd.com/<user>/film/<slug>/ → <user>
+const reviewUser = (url) => String(url).match(/letterboxd\.com\/(\w+)\/film\//i)?.[1] || null;
+
 async function load(input) {
   const url = extractLink(input);
-  if (els.url.value !== url) els.url.value = url;
   setStatus(t("fetching"));
   els.go.disabled = true;
   try {
@@ -190,6 +195,13 @@ async function load(input) {
     await styleFontReady();
     render();
     setStatus("");
+    // Show whose review it is (boxd.it links only tell us once loaded), ready to pick another of theirs.
+    const user = reviewUser(data.url);
+    if (user) {
+      els.user.value = user;
+      if (picker?.user.toLowerCase() === user.toLowerCase()) collapsePicker();
+      else els.picker.hidden = true;
+    }
     syncUrl(url);
   } catch (err) {
     setStatus(err.message, err.outage ? "outage" : "error");
@@ -198,9 +210,180 @@ async function load(input) {
   }
 }
 
+// ---------- review picker ----------
+// Lists a member's reviews, five at a time, searchable by film. Letterboxd pages hold 12 reviews,
+// so "Show more" reveals what's already loaded before fetching the next page.
+
+const PICKER_STEP = 5;
+let picker = null; // { user, name, reviews, page, hasMore, shown, loading }
+
+const fold = (s) => s.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const dateFormat = new Intl.DateTimeFormat(document.documentElement.lang || "en", { day: "numeric", month: "short", year: "numeric" });
+
+function pickerMatches() {
+  const q = fold(els.pickerSearch.value.trim());
+  return q ? picker.reviews.filter((r) => fold(`${r.title} ${r.year || ""}`).includes(q)) : picker.reviews;
+}
+
+function findReviews(user) {
+  user = user.replace(/^@/, "");
+  els.user.value = user;
+  // Same member again: reuse what's loaded instead of asking Letterboxd twice.
+  if (picker?.user.toLowerCase() === user.toLowerCase() && picker.reviews.length) return openPicker();
+  picker = { user, name: user, reviews: [], page: 0, hasMore: true, shown: PICKER_STEP, loading: false };
+  els.pickerSearch.value = "";
+  openPicker();
+  nextPage();
+}
+
+async function nextPage() {
+  const p = picker;
+  if (p.loading || !p.hasMore) return;
+  p.loading = true;
+  els.go.disabled = true;
+  setStatus("");
+  renderPicker();
+  try {
+    const res = await fetch(`/api/reviews?user=${encodeURIComponent(p.user)}&page=${p.page + 1}`);
+    const data = await res.json();
+    if (!res.ok) {
+      const err = new Error(I18N[`err_${data.code}`] || data.error || t("generic_error"));
+      err.outage = ["fetch", "rate_limited"].includes(data.code);
+      throw err;
+    }
+    Object.assign(p, { page: data.page, hasMore: data.hasMore, name: data.name });
+    p.reviews.push(...data.reviews);
+  } catch (err) {
+    if (picker !== p) return;
+    setStatus(err.message, err.outage ? "outage" : "error");
+    if (!p.reviews.length) {
+      picker = null;
+      els.picker.hidden = true;
+    }
+  } finally {
+    p.loading = false;
+    els.go.disabled = false;
+    if (picker === p) renderPicker();
+  }
+}
+
+function openPicker() {
+  els.picker.hidden = false;
+  els.picker.classList.remove("collapsed");
+  els.pickerReopen.hidden = true;
+  renderPicker();
+}
+
+function collapsePicker() {
+  els.picker.classList.add("collapsed");
+  els.pickerReopen.hidden = false;
+}
+
+function renderPicker() {
+  const p = picker;
+  const query = els.pickerSearch.value.trim();
+  const matches = pickerMatches();
+  els.pickerName.textContent = p.name;
+  els.pickerList.replaceChildren(...matches.slice(0, p.shown).map(pickRow));
+  if (p.loading) {
+    for (let i = 0; i < (p.reviews.length ? 2 : PICKER_STEP); i++) els.pickerList.append(skeletonRow());
+  }
+  let empty = "";
+  if (!p.loading && !matches.length) {
+    if (!query) empty = t("no_reviews");
+    else if (p.hasMore) empty = t("no_match_loaded", { q: query, n: p.reviews.length });
+    else empty = t("no_match", { q: query });
+  }
+  els.pickerEmpty.textContent = empty;
+  els.pickerEmpty.hidden = !empty;
+  els.pickerMore.hidden = p.loading || !(matches.length > p.shown || p.hasMore);
+  els.pickerMore.textContent = query && matches.length <= p.shown ? t("search_older") : t("show_more");
+}
+
+function make(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function pickRow(r) {
+  const btn = make("button", "pick");
+  btn.type = "button";
+  btn.addEventListener("click", () => {
+    collapsePicker();
+    load(r.url).then(() => {
+      if (!els.workspace.hidden) els.workspace.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  const poster = make("img", "pick-poster");
+  poster.alt = "";
+  poster.loading = "lazy";
+  if (r.poster) poster.src = proxied(r.poster);
+
+  const main = make("span", "pick-main");
+  const title = make("span", "pick-title");
+  const name = make("span", "", r.title);
+  name.lang = "en";
+  title.append(name);
+  if (r.year) title.append(make("span", "pick-year", r.year));
+  const meta = make("span", "pick-meta");
+  if (r.rating) meta.append(make("span", "pick-stars", r.rating));
+  if (r.date) meta.append(make("span", "pick-date", dateFormat.format(new Date(`${r.date}T00:00`))));
+  main.append(title, meta);
+  if (r.excerpt) main.append(make("span", "pick-excerpt", r.excerpt));
+
+  btn.append(poster, main, make("span", "pick-arrow", "→"));
+  const li = make("li");
+  li.append(btn);
+  return li;
+}
+
+function skeletonRow() {
+  const li = make("li", "pick-skeleton");
+  li.setAttribute("aria-hidden", "true");
+  li.append(make("span", "sk-poster"), make("span", "sk-lines"));
+  return li;
+}
+
+els.pickerSearch.addEventListener("input", () => {
+  picker.shown = PICKER_STEP;
+  renderPicker();
+});
+
+els.pickerMore.addEventListener("click", () => {
+  const matches = pickerMatches();
+  if (matches.length > picker.shown) {
+    picker.shown += PICKER_STEP;
+    return renderPicker();
+  }
+  if (!els.pickerSearch.value.trim()) picker.shown += PICKER_STEP;
+  nextPage();
+});
+
+els.pickerReopen.addEventListener("click", () => {
+  openPicker();
+  els.pickerSearch.focus();
+});
+
 els.form.addEventListener("submit", (e) => {
   e.preventDefault();
-  load(els.url.value.trim());
+  const value = els.user.value.trim();
+  if (!value) return els.user.focus();
+  if (!hasLink(value)) return findReviews(value);
+  const link = extractLink(value);
+  // A profile link (letterboxd.com/<user>/) lists their reviews; anything else is a review link.
+  const profile = link.match(/letterboxd\.com\/(\w+)\/?(?:reviews\/?)?$/i);
+  return profile ? findReviews(profile[1]) : load(link);
+});
+
+// Pasting a review link goes straight to the card.
+els.user.addEventListener("paste", (e) => {
+  const text = e.clipboardData?.getData("text") || "";
+  if (!hasLink(text) || /letterboxd\.com\/\w+\/?(?:reviews\/?)?$/i.test(extractLink(text))) return;
+  e.preventDefault();
+  els.user.value = extractLink(text);
+  load(text);
 });
 
 els.quoteInput.addEventListener("input", renderQuote);
@@ -518,6 +701,5 @@ if (["classic", "blockbuster", "festival", "handwritten"].includes(requestedStyl
   els.styles.querySelector(`[data-style="${requestedStyle}"]`).click();
 }
 if (initial) {
-  els.url.value = initial;
   load(initial);
 }

@@ -461,6 +461,66 @@ async function scrapeRepeatReview(reviewUrl) {
   };
 }
 
+// ---------- a member's reviews (the review picker) ----------
+// Film slugs don't always match titles (Primetime is /primetime-2026/), so instead of guessing the
+// link the UI asks for a username and lists that member's reviews to pick from.
+
+const isUsername = (s) => /^\w{1,40}$/.test(s);
+
+// Each listed film needs one extra request for its poster; posters rarely change, so remember them.
+const posterCache = new Map();
+async function listPoster(slug) {
+  if (posterCache.has(slug)) return posterCache.get(slug);
+  let url = null;
+  try {
+    const json = JSON.parse(await fetchPage(`https://letterboxd.com/film/${slug}/poster/std/70/`));
+    url = json.url2x || json.url || null;
+  } catch {
+    // A missing poster only means a blank thumbnail.
+  }
+  if (posterCache.size >= 5000) posterCache.delete(posterCache.keys().next().value);
+  posterCache.set(slug, url);
+  return url;
+}
+
+// Letterboxd challenges /reviews/films/ (page 1) and /reviews/page/<n>/, but serves these two.
+const reviewsPageUrl = (user, page) =>
+  page === 1 ? `https://letterboxd.com/${user}/reviews/` : `https://letterboxd.com/${user}/reviews/films/page/${page}/`;
+
+async function listReviews(user, page) {
+  let res;
+  try {
+    res = await fetch(reviewsPageUrl(user, page), { headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9" } });
+  } catch (err) {
+    throw fail("fetch", `Letterboxd is unreachable: ${err.cause?.code || err.message}`);
+  }
+  if (res.status === 404) throw fail("user_not_found", "No Letterboxd member with that username.");
+  if (!res.ok) throw fail("fetch", `Letterboxd responded with ${res.status}`);
+  const html = await res.text();
+
+  const articles = html.split(/<article\b/).slice(1).filter((a) => /data-object-name="review"/.test(a));
+  const reviews = articles.map((a) => {
+    const link = a.match(/class="primaryname[^"]*"><a href="(\/[\w.-]+\/film\/[\w-]+\/(?:\d+\/)?)">([\s\S]*?)<\/a>/);
+    if (!link) return null;
+    const body = a.match(/<div class="body-text -prose[^>]*>([\s\S]*?)<\/div>/)?.[1] || "";
+    return {
+      url: `https://letterboxd.com${link[1]}`,
+      slug: a.match(/data-item-slug="([\w-]+)"/)?.[1] || link[1].split("/")[3],
+      title: decodeEntities(link[2].trim()),
+      year: a.match(/class="releasedate"><a[^>]*>(\d{4})</)?.[1] || null,
+      rating: decodeEntities(a.match(/class="glyph -rating"[^>]*aria-label="([^"]*)"/)?.[1] || "") || null,
+      date: a.match(/<time[^>]*datetime="([\d-]+)"/)?.[1] || null,
+      excerpt: htmlToText(body).replace(/\s+/g, " ").slice(0, 220),
+    };
+  }).filter(Boolean);
+  const posters = await Promise.all(reviews.map((r) => listPoster(r.slug)));
+  reviews.forEach((r, i) => (r.poster = posters[i]));
+
+  // og:title is "<display name>’s reviews"
+  const name = (meta(html, "og:title") || "").replace(/[’']s reviews$/, "").replace(/^‎/, "") || user;
+  return { user, name, page, reviews, hasMore: /<a class="next"/.test(html) };
+}
+
 // ---------- TMDB (optional poster source) ----------
 
 // Letterboxd film pages carry the TMDB id, so no fuzzy title search is needed.
@@ -586,6 +646,7 @@ function createLimiter(limit) {
 }
 
 const lookupLimiter = createLimiter(limitFromEnv("RATE_LIMIT_PER_MINUTE", 5));
+const listLimiter = createLimiter(limitFromEnv("LIST_RATE_LIMIT_PER_MINUTE", 10));
 const cardLimiter = createLimiter(limitFromEnv("CARD_RATE_LIMIT_PER_MINUTE", 5));
 const imageLimiter = createLimiter(limitFromEnv("IMAGE_RATE_LIMIT_PER_MINUTE", 120));
 
@@ -627,6 +688,26 @@ async function handleReview(req, res, params) {
     res.logNote += ` code=${code}`;
     if (code === "fetch") console.warn(`Review fetch failed: ${err.message}`);
     sendJson(res, code === "fetch" ? 502 : 400, { code, error: err.message || "Failed to fetch review." });
+  }
+}
+
+async function handleReviewList(req, res, params) {
+  const user = (params.get("user") || "").trim().replace(/^@/, "");
+  const page = Math.min(Math.max(1, parseInt(params.get("page"), 10) || 1), 500);
+  res.logNote = `user=${user.slice(0, 60)} page=${page}`;
+  if (!isUsername(user)) {
+    res.logNote += " code=invalid_user";
+    return sendJson(res, 400, { code: "invalid_user", error: "That doesn't look like a Letterboxd username." });
+  }
+  const retryAfter = listLimiter(clientIp(req));
+  if (retryAfter) return tooMany(res, retryAfter);
+  try {
+    sendJson(res, 200, await listReviews(user, page));
+  } catch (err) {
+    const code = err.code || "fetch";
+    res.logNote += ` code=${code}`;
+    if (code === "fetch") console.warn(`Review list fetch failed: ${err.message}`);
+    sendJson(res, code === "fetch" ? 502 : 404, { code, error: err.message || "Failed to fetch reviews." });
   }
 }
 
@@ -841,6 +922,7 @@ async function serveStatic(req, res, pathname) {
 async function route(req, res) {
   const { pathname, searchParams } = new URL(req.url, `http://${req.headers.host}`);
   if (pathname === "/api/review") return handleReview(req, res, searchParams);
+  if (pathname === "/api/reviews") return handleReviewList(req, res, searchParams);
   if (pathname === "/api/config") {
     // Public by design (the footer needs it), but reveals nothing while the support area is hidden.
     const sponsors = await loadSponsors();
